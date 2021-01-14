@@ -1,0 +1,56 @@
+{
+	"_qname": "davita:document",
+	"_type": "d:type",
+	"title": "Davita Document",
+	"type": "object",
+	"_parent": "n:node",
+	"sort": 1,
+	"properties": {
+		"title": {
+			"type": "string",
+			"title": "title",
+			"required": true
+		},
+		"description": {
+			"type": "string",
+			"title": "Description"
+		},
+		"metadata": {
+			"type": "array",
+			"title": "Additional Metadata",
+			"items": {
+				"type": "object",
+				"title": "metadata",
+				"properties": {
+					"name": {
+						"title": "Name",
+						"type": "string",
+						"required": true
+					},
+					"value": {
+						"type": "string",
+						"title": "value"
+					}
+				}
+			}
+		},
+		"entitlements": {
+			"type": "array",
+			"title": "List of entitled Groups/People",
+			"_relator": {
+				"associationType": "davita:entitled",
+				"nodeType": "davita:principal"
+			}
+		},
+		"document": {
+			"type": "array",
+			"title": "Document Content",
+			"_relator": {
+				"associationType": "a:linked",
+				"nodeType": "n:node"
+			}
+		}
+	},
+	"dependencies": {},
+	"$schema": "http://json-schema.org/draft-04/schema#"
+}

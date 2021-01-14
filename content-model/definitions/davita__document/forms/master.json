@@ -1,0 +1,59 @@
+{
+	"title": "Default Form",
+	"engineId": "alpaca1",
+	"fields": {
+		"title": {
+			"type": "text",
+			"label": "Title",
+			"required": true,
+			"default": ""
+		},
+		"description": {
+			"type": "text",
+			"label": "Description",
+			"required": true,
+			"default": ""
+		},
+		"metadata": {
+			"type": "array",
+			"label": "Additional Metadata",
+			"required": false,
+			"items": {
+				"type": "object",
+				"label": "Additional Metadata",
+				"fields": {
+					"name": {
+						"type": "text",
+						"label": "Name",
+						"required": true,
+						"default": ""
+					},
+					"value": {
+						"type": "text",
+						"label": "Value",
+						"required": true,
+						"default": ""
+					}
+				}
+			}
+		},
+		"entitlements": {
+			"type": "node-picker",
+			"label": "List Of Entitled Groups People",
+			"required": false,
+			"picker": {
+				"typeQName": "davita:principal",
+				"associationType": "davita:entitled",
+				"includeChildTypes": false
+			}
+		},
+		"document": {
+			"type": "related-content",
+			"label": "Document Content",
+			"required": false,
+			"uploadPath": "/files",
+			"maxNumberOfFiles": 5
+		}
+	},
+	"_form_key": "default"
+}

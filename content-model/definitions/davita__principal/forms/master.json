@@ -1,0 +1,26 @@
+{
+	"title": "Entitlement",
+	"engineId": "alpaca1",
+	"fields": {
+		"title": {
+			"type": "text",
+			"label": "Title",
+			"required": true,
+			"default": ""
+		},
+		"id": {
+			"type": "text",
+			"label": "Id",
+			"required": true,
+			"default": ""
+		},
+		"email": {
+			"type": "text",
+			"label": "Email Address",
+			"required": true,
+			"default": ""
+		}
+	},
+	"_type": "n:form",
+	"description": ""
+}

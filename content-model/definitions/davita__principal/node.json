@@ -1,0 +1,25 @@
+{
+	"title": "Principal",
+	"description": "",
+	"_qname": "davita:principal",
+	"_type": "d:type",
+	"type": "object",
+	"_parent": "n:node",
+	"properties": {
+		"title": {
+			"type": "string",
+			"title": "title",
+			"required": true
+		},
+		"id": {
+			"type": "string",
+			"title": "ID",
+			"required": true
+		},
+		"email": {
+			"type": "string",
+			"title": "Email Address"
+		}
+	},
+	"mandatoryFeatures": {}
+}
