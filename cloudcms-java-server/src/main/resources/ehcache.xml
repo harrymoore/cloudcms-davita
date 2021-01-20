@@ -1,0 +1,122 @@
+<config
+        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns='http://www.ehcache.org/v3'
+        xsi:schemaLocation="
+            http://www.ehcache.org/v3 
+            http://www.ehcache.org/schema/ehcache-core-3.7.xsd">
+
+    <!-- Persistent cache directory -->
+    <persistence directory="cache" />
+
+    <cache-template name="node">
+        <expiry>
+            <ttl unit="hours">4</ttl>
+        </expiry>
+
+        <listeners>
+            <listener>
+                <class>com.cloudcms.cache.CacheLogger</class>
+                <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
+                <event-ordering-mode>UNORDERED</event-ordering-mode>
+                <events-to-fire-on>CREATED</events-to-fire-on>
+                <events-to-fire-on>EXPIRED</events-to-fire-on>
+                <events-to-fire-on>EVICTED</events-to-fire-on>
+            </listener>
+        </listeners>
+
+        <resources>
+            <heap>1000</heap>
+            <offheap unit="MB">10</offheap>
+            <disk persistent="true" unit="MB">20</disk>
+        </resources>
+    </cache-template>
+
+    <cache-template name="page">
+        <expiry>
+            <ttl unit="hours">4</ttl>
+        </expiry>
+
+        <listeners>
+            <listener>
+                <class>com.cloudcms.cache.CacheLogger</class>
+                <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
+                <event-ordering-mode>UNORDERED</event-ordering-mode>
+                <events-to-fire-on>CREATED</events-to-fire-on>
+                <events-to-fire-on>EXPIRED</events-to-fire-on>
+                <events-to-fire-on>EVICTED</events-to-fire-on>
+            </listener>
+        </listeners>
+
+        <resources>
+            <heap>1000</heap>
+            <offheap unit="MB">10</offheap>
+            <disk persistent="true" unit="MB">20</disk>
+        </resources>
+    </cache-template>
+
+    <cache-template name="attachment">
+        <expiry>
+            <ttl unit="hours">4</ttl>
+        </expiry>
+
+        <listeners>
+            <listener>
+                <class>com.cloudcms.cache.CacheLogger</class>
+                <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
+                <event-ordering-mode>UNORDERED</event-ordering-mode>
+                <events-to-fire-on>CREATED</events-to-fire-on>
+                <events-to-fire-on>EXPIRED</events-to-fire-on>
+                <events-to-fire-on>EVICTED</events-to-fire-on>
+            </listener>
+        </listeners>
+
+        <resources>
+            <heap>100</heap>
+            <offheap unit="MB">25</offheap>
+            <disk persistent="true" unit="MB">50</disk>
+        </resources>
+    </cache-template>
+
+    <cache-template name="query">
+        <expiry>
+            <ttl unit="hours">1</ttl>
+        </expiry>
+
+        <listeners>
+            <listener>
+                <class>com.cloudcms.cache.CacheLogger</class>
+                <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
+                <event-ordering-mode>UNORDERED</event-ordering-mode>
+                <events-to-fire-on>CREATED</events-to-fire-on>
+                <events-to-fire-on>EXPIRED</events-to-fire-on>
+                <events-to-fire-on>EVICTED</events-to-fire-on>
+            </listener>
+        </listeners>
+
+        <resources>
+            <heap>1000</heap>
+            <offheap unit="MB">10</offheap>
+            <disk persistent="true" unit="MB">20</disk>
+        </resources>
+    </cache-template>
+
+    <cache alias="node-cache" uses-template="node">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.lang.Object</value-type>
+    </cache>
+
+    <cache alias="attachment-cache" uses-template="attachment">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.lang.Object</value-type>
+    </cache>
+
+    <cache alias="query-cache" uses-template="query">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.lang.Object</value-type>
+    </cache>
+
+    <cache alias="page-cache" uses-template="page">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.lang.String</value-type>
+    </cache>
+</config>
