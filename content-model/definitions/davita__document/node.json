@@ -36,7 +36,7 @@
 		},
 		"entitlements": {
 			"type": "array",
-			"title": "List of entitled Groups/People",
+			"title": "List of entitled Groups and Individuals",
 			"_relator": {
 				"associationType": "davita:entitled",
 				"nodeType": "davita:principal"

@@ -39,12 +39,13 @@
 		},
 		"entitlements": {
 			"type": "node-picker",
-			"label": "List Of Entitled Groups People",
+			"label": "List of entitled Groups and Individuals",
 			"required": false,
 			"picker": {
 				"typeQName": "davita:principal",
 				"associationType": "davita:entitled",
-				"includeChildTypes": false
+				"includeChildTypes": false,
+				"upload": false
 			}
 		},
 		"document": {
