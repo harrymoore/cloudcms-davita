@@ -5,80 +5,76 @@ package com.cloudcms.notifications;
 
 import javax.jms.Session;
 
+import com.amazon.sqs.javamessaging.ProviderConfiguration;
+import com.amazon.sqs.javamessaging.SQSConnectionFactory;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
 
-import com.amazon.sqs.javamessaging.SQSConnectionFactory;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.sqs.AmazonSQSClient;
-
 @Configuration
 @EnableJms
+@ConditionalOnProperty(name="notifications.notificationType", havingValue="sqs")
 public class SqsConfig {
-	@Value("${notifications.aws.accessKey}")
-	private String awsAccessKey;
+    @Value("${notifications.aws.accessKey}")
+    private String awsAccessKey;
 
-	@Value("${notifications.aws.region}")
-	private String awsRegion;
+    @Value("${notifications.aws.region}")
+    private String awsRegion;
 
-	@Value("${notifications.aws.secretKey}")
-	private String awsSecretKey;
+    @Value("${notifications.aws.secretKey}")
+    private String awsSecretKey;
 
-	@Value("${notifications.aws.queueUrl}")
-	private String awsQueueUrl;
+    @Value("${notifications.aws.queueUrl}")
+    private String awsQueueUrl;
 
-	// @Bean(name = "invalidationQueueUrl")
-	// public String invalidationQueueUrl() {
-	// 	return awsQueueUrl;
-	// }
+    @Value("${notifications.notificationType}")
+    private String notificationsType;
 
-	@Bean(name = "invalidationQueueName")
-	@Primary
-	public String invalidationQueueName() {
-		return awsQueueUrl.substring(1+awsQueueUrl.lastIndexOf("/"));
-	}
+    // @Bean(name = "invalidationQueueUrl")
+    // public String invalidationQueueUrl() {
+    // return awsQueueUrl;
+    // }
 
-	@Bean
-	public AmazonSQSClient amazonSQSClient() {
-		return new AmazonSQSClient(getAwsCredentials());
-	}
+    @Bean(name = "invalidationQueueName")
+    // @Primary
+    public String invalidationQueueName() {
+        return awsQueueUrl.substring(1 + awsQueueUrl.lastIndexOf("/"));
+    }
 
-	private AWSCredentials getAwsCredentials() {
-		return new BasicAWSCredentials(awsAccessKey, awsSecretKey);
-	}
+    @Bean(name = "notificationsType")
+    public String notificationsType() {
+        return notificationsType;
+    }
 
-	private AWSCredentialsProvider getAwsCredentialsProvider() {
-		return new AWSCredentialsProvider() {
-			@Override
-			public AWSCredentials getCredentials() {
-				return getAwsCredentials();
-			}
+    @Bean
+    public AmazonSQS amazonSQSClient() {
+        return AmazonSQSClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(getAwsCredentials()))
+                .build();
+    }
 
-			@Override
-			public void refresh() {
-			}
-		};
-	}
+    private AWSCredentials getAwsCredentials() {
+        return new BasicAWSCredentials(awsAccessKey, awsSecretKey);
+    }
+    
+    @Bean
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+        final SQSConnectionFactory connectionFactory = new SQSConnectionFactory(new ProviderConfiguration(), amazonSQSClient());
+        final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setDestinationResolver(new DynamicDestinationResolver());
+        factory.setConcurrency("3-10");
+        factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
 
-	@Bean
-	public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
-		final SQSConnectionFactory connectionFactory = SQSConnectionFactory.builder()
-				.withRegion(Region.getRegion(Regions.fromName(awsRegion)))
-				.withAWSCredentialsProvider(getAwsCredentialsProvider()).build();
-		final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-		factory.setConnectionFactory(connectionFactory);
-		factory.setDestinationResolver(new DynamicDestinationResolver());
-		factory.setConcurrency("3-10");
-		factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
-		return factory;
-	}
+        return factory;
+    }
 }

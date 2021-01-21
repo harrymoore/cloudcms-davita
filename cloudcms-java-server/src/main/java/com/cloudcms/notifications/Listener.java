@@ -17,10 +17,12 @@ import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnProperty(name="notifications.notificationType", havingValue="sqs")
 public class Listener {
 
     private final Logger log = LoggerFactory.getLogger(Listener.class);
@@ -41,7 +43,9 @@ public class Listener {
     @Autowired
     private String invalidationQueueName;
 
-    // @JmsListener(destination = "cloudcms-dev-integration-test1")
+    @Autowired
+    private String notificationsType;
+
     @JmsListener(destination = "#{@invalidationQueueName}")
     public void receive(String message) {
         log.trace("Received message {}", message);
