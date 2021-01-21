@@ -30,7 +30,7 @@ public class AdminController {
 
 
     @GetMapping(value = "/clearcache")
-    public @ResponseBody Map<String, String> healthcheck1() {
+    public @ResponseBody Map<String, String> clearcache() {
         log.trace("clearcache");
 
         cacheClearService.clearCache();
