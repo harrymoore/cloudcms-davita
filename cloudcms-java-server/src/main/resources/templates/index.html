@@ -23,16 +23,20 @@
                 <h1 class="my-4"></h1>
 
                 <div class="btn-group">
-                    <a th:href="@{/index?filter=day}" class="btn btn-primary" th:classappend="${filter.equals('1') ? 'active' : ''}" aria-current="page">Day</a>
-                    <a th:href="@{/index?filter=week}" class="btn btn-primary" th:classappend="${filter.equals('1') ? 'active' : ''}" aria-current="page">Week</a>
-                    <a th:href="@{/index?filter=Month}" class="btn btn-primary" th:classappend="${filter.equals('1') ? 'active' : ''}" aria-current="page">Month</a>
-                    <a th:href="@{/index?filter=all}" class="btn btn-primary" th:classappend="${filter.equals('all') ? 'active' : ''}" aria-current="page">All</a>
+                    <a th:href="@{/index?filter=day}" class="btn btn-primary"
+                        th:classappend="${filter.equals('1') ? 'active' : ''}" aria-current="page">Day</a>
+                    <a th:href="@{/index?filter=week}" class="btn btn-primary"
+                        th:classappend="${filter.equals('1') ? 'active' : ''}" aria-current="page">Week</a>
+                    <a th:href="@{/index?filter=Month}" class="btn btn-primary"
+                        th:classappend="${filter.equals('1') ? 'active' : ''}" aria-current="page">Month</a>
+                    <a th:href="@{/index?filter=all}" class="btn btn-primary"
+                        th:classappend="${filter.equals('all') ? 'active' : ''}" aria-current="page">All</a>
                 </div>
 
                 <h1 class="my-4"></h1>
 
                 <div class="list-group">
-                    <a th:each="doc : ${documents}" th:href="@{/index/{documentId}(documentId=${doc.getId()})}"
+                    <a th:each="doc : ${indexDocuments}" th:href="@{/index/{documentId}(documentId=${doc.getId()})}"
                         class="list-group-item list-group-item-action" aria-current="true"
                         th:classappend="${doc.getId().equals(id) ? 'active' : ''}">
                         <div class="d-flex w-100 justify-content-between">
@@ -48,6 +52,46 @@
 
             <div class="col-lg-9" th:if="${document != null}">
 
+                <div>
+                    <h2 class="mb-1" th:text="${document.getTitle()}"></h2>
+                    <h2 class="mb-3" th:text="${document.getDescription()}"></h2>
+                    <h2 class="mb-3" th:each="customMetadataTag : ${document.get('metadata')}"
+                        th:text="${customMetadataTag.get('name').concat(': ').concat(customMetadataTag.get('value'))}">
+                    </h2>
+                </div>
+
+                <!--  
+                    each relator document's "default" attachment
+                -->
+
+                <!-- <a th:each="attachment : ${attachments}" th:href="@{/index/{documentId}(documentId=${attachment.document.getId()})}" th:text="${attachment.document.getId()}"></a> -->
+                <div th:each="attachment: ${attachments}">
+                    <div th:if="${attachment.isVideo}">
+                        <h2>VIDEO</h2>
+                    </div>
+                    <div th:if="${attachment.isAudio}">
+                        <h2>AUDIO</h2>
+                    </div>
+                    <div th:if="${attachment.isPdf}">
+                        <h2>PDF</h2>
+                    </div>
+                </div>
+                <!--  
+                    /each relator document's "default" attachment
+                -->
+
+
+
+
+
+
+
+
+
+
+
+
+                
                 <div id="carouselExampleIndicators" class="carousel slide my-4" data-ride="carousel">
                     <ol class="carousel-indicators">
                         <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
@@ -76,44 +120,43 @@
                 </div>
 
                 <div class="row">
-                    <!-- <a th:each="doc : ${documents}" th:href="@{/index/{documentId}(documentId=${doc.getId()})}" -->
 
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card h-100">
-                                <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
-                                <div class="card-body">
-                                    <h4 class="card-title">
-                                        <a href="#">Item One</a>
-                                    </h4>
-                                    <h5>$24.99</h5>
-                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet
-                                        numquam aspernatur!
-                                    </p>
-                                </div>
-                                <div class="card-footer">
-                                    <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
-                                </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100">
+                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+                            <div class="card-body">
+                                <h4 class="card-title">
+                                    <a href="#">Item One</a>
+                                </h4>
+                                <h5>$24.99</h5>
+                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet
+                                    numquam aspernatur!
+                                </p>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card h-100">
-                                <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
-                                <div class="card-body">
-                                    <h4 class="card-title">
-                                        <a href="#">Item One</a>
-                                    </h4>
-                                    <h5>$24.99</h5>
-                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet
-                                        numquam aspernatur!
-                                    </p>
-                                </div>
-                                <div class="card-footer">
-                                    <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
-                                </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100">
+                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+                            <div class="card-body">
+                                <h4 class="card-title">
+                                    <a href="#">Item One</a>
+                                </h4>
+                                <h5>$24.99</h5>
+                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet
+                                    numquam aspernatur!
+                                </p>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
                             </div>
                         </div>
-        
+                    </div>
+
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="card h-100">
                             <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
