@@ -1,5 +1,5 @@
 {
-	"title": "Default Form",
+	"title": "Davita Document Communication",
 	"engineId": "alpaca1",
 	"fields": {
 		"title": {
@@ -9,15 +9,13 @@
 			"default": ""
 		},
 		"description": {
-			"type": "text",
+			"type": "textarea",
 			"label": "Description",
-			"required": true,
 			"default": ""
 		},
 		"metadata": {
 			"type": "array",
 			"label": "Additional Metadata",
-			"required": false,
 			"items": {
 				"type": "object",
 				"label": "Additional Metadata",
@@ -55,6 +53,5 @@
 			"uploadPath": "/files",
 			"maxNumberOfFiles": 5
 		}
-	},
-	"_form_key": "default"
+	}
 }
