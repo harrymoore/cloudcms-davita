@@ -11,6 +11,7 @@ import org.gitana.platform.client.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +38,7 @@ public class StaticController {
      * @param metadata
      * @return
      */
-    @GetMapping(value = "/static/node/{id}")
+    @GetMapping(value = "/attachment/{id}")
     public @ResponseBody ResponseEntity<byte[]> staticById(@PathVariable final String id,
             @RequestParam(required = false) final String branch, 
             @RequestParam(required = false) final String locale,
@@ -51,10 +52,38 @@ public class StaticController {
         final Attachment attachment = node.listAttachments().get(attachmentName == null ? "default" : attachmentName);
 
         return ResponseEntity.ok()
-            .header("Content-Disposition", "attachment; filename=" + (name == null ? name : node.getTitle()))
+            .header("Content-Disposition", ContentDisposition.inline().filename(name != null ? name : node.getTitle()).build().toString())
             .contentLength(attachment.getLength())
             .contentType(MediaType.parseMediaType(attachment.getContentType()))
             .body(node.downloadAttachment(attachmentName == null ? "default" : attachmentName));        
+    }
+
+    /**
+     * Return a preview of the requested node's attachment
+     * 
+     * @param id
+     * @param branch
+     * @param locale
+     * @param attachmentName
+     * @param name
+     * @param metadata
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = "/preview/{id}")
+    public @ResponseBody ResponseEntity<byte[]> previewById(@PathVariable final String nodeId,
+            @RequestParam(required = false) final String branchId,
+            @RequestParam(required = true) final String attachmentName,
+            @RequestParam(required = false, defaultValue = "default") final String name,
+            @RequestParam(required = true) final String mimetype, @RequestParam(required = true) final String size,
+            @RequestAttribute(required = false) final Boolean metadata) throws Exception {
+        
+        log.debug("{} {} {}", branchId, attachmentName, nodeId);
+
+        return ResponseEntity.ok()
+            .header("Content-Disposition", ContentDisposition.inline().filename(name).build().toString())
+            .contentType(MediaType.parseMediaType(mimetype))
+            .body(driver.getDocumentPreviewBytesById(branchId, nodeId, attachmentName, mimetype, size, CloudcmsDriver.USE_CACHE));        
     }
 
     /**

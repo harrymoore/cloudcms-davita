@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.gitana.platform.client.Driver;
 import org.gitana.platform.client.Gitana;
 import org.gitana.platform.client.application.Application;
+import org.gitana.platform.client.attachment.Attachment;
 import org.gitana.platform.client.branch.Branch;
 import org.gitana.platform.client.node.Node;
 import org.gitana.platform.client.platform.Platform;
@@ -35,7 +36,8 @@ import org.springframework.stereotype.Service;
 
 // Spring will initialize as a singleton
 @Service
-@PropertySource(value = {"classpath:gitana-default.properties", "file:./gitana.properties"}, ignoreResourceNotFound = true )
+@PropertySource(value = { "classpath:gitana-default.properties",
+        "file:./gitana.properties" }, ignoreResourceNotFound = true)
 public class CloudcmsDriver {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -77,7 +79,7 @@ public class CloudcmsDriver {
 
     /**
      * Initialize the connection to Cloud CMS
-     *  
+     * 
      * @throws CloudCmsDriverException
      */
     @PostConstruct
@@ -87,8 +89,7 @@ public class CloudcmsDriver {
         application = platform.readApplication(applicationId);
         log.info(String.format("Using application object with id \"%s\"", application.getId()));
         project = platform.readProject(application.get("projectId").toString());
-        log.info(String.format("Connected to project \"%s\" with id \"%s\"", project.getTitle(),
-                project.getId()));
+        log.info(String.format("Connected to project \"%s\" with id \"%s\"", project.getTitle(), project.getId()));
         contentRepository = (Repository) project.getStack().readDataStore("content");
 
         driver = DriverContext.getDriver();
@@ -97,19 +98,20 @@ public class CloudcmsDriver {
         DriverContext.getDriver().setLocale(locale);
 
         refreshBranches();
-        activeBranch = getBranch(defaultBranch);            
+        activeBranch = getBranch(defaultBranch);
     }
 
     /**
-     * retrieve the list of active workspace branches from Cloud CMS.
-     * Sets this.branchList keyed by branch id and by branch title
+     * retrieve the list of active workspace branches from Cloud CMS. Sets
+     * this.branchList keyed by branch id and by branch title
      */
     private synchronized void refreshBranches() {
         branchList.keySet().removeAll(branchList.keySet());
         contentRepository.listBranches().asList().forEach(branch -> {
             if (branch.isMaster()) {
                 branchList.put("master", branch);
-            } else if (branch.getType().equals(BranchType.CUSTOM) && !branch.isReadOnly() && !branch.isSnapshot() && !branch.isFrozen() && !branch.getTitle().equals("")) {
+            } else if (branch.getType().equals(BranchType.CUSTOM) && !branch.isReadOnly() && !branch.isSnapshot()
+                    && !branch.isFrozen() && !branch.getTitle().equals("")) {
                 // this looks like an active workspace so index it by name similar to master
                 branchList.put(branch.getTitle(), branch);
             }
@@ -119,7 +121,7 @@ public class CloudcmsDriver {
     }
 
     /**
-     * Retrieve the active branch or master 
+     * Retrieve the active branch or master
      * 
      * @return the requested Branch (master) on the current Repository
      */
@@ -153,7 +155,6 @@ public class CloudcmsDriver {
         return branchList.get(branchId);
     }
 
-
     /**
      * retrieve a node by its id (_doc)
      * 
@@ -164,11 +165,12 @@ public class CloudcmsDriver {
      * @return Node
      * @throws CloudCmsDriverBranchNotFoundException
      */
-    @Cacheable(value = "node-cache", condition = "#cacheResults.equals(true)", keyGenerator = "nodeCacheKeyGenerator")    
-    public Node getNodeById(final String branchId, final String locale, final String nodeId, final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
+    @Cacheable(value = "node-cache", condition = "#cacheResults.equals(true)", keyGenerator = "nodeCacheKeyGenerator")
+    public Node getNodeById(final String branchId, final String locale, final String nodeId, final Boolean cacheResults)
+            throws CloudCmsDriverBranchNotFoundException {
         log.debug(String.format("get node with id %s and locale %s from branch %s", nodeId, locale, branchId));
 
-        if (locale != null ) {
+        if (locale != null) {
             setLocale(locale);
         }
 
@@ -184,15 +186,16 @@ public class CloudcmsDriver {
      * 
      * @return Node
      */
-    @Cacheable(value = "node-cache", condition = "#cacheResults.equals(true)", key = "new org.springframework.cache.interceptor.SimpleKey(#branch, #locale, #path)")    
-    public Node getNodeByPath(final String branchId, final String locale, final String path, final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
+    @Cacheable(value = "node-cache", condition = "#cacheResults.equals(true)", key = "new org.springframework.cache.interceptor.SimpleKey(#branch, #locale, #path)")
+    public Node getNodeByPath(final String branchId, final String locale, final String path, final Boolean cacheResults)
+            throws CloudCmsDriverBranchNotFoundException {
         log.debug(String.format("get node with path %s", path));
 
-        if (locale != null ) {
+        if (locale != null) {
             setLocale(locale);
         }
 
-        return (Node)getBranch(branchId).readNode("root", path);
+        return (Node) getBranch(branchId).readNode("root", path);
     }
 
     /**
@@ -206,20 +209,32 @@ public class CloudcmsDriver {
      * @throws CloudCmsDriverBranchNotFoundException
      */
     @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName + '-' + #root.args[0] + '-' + #root.args[1] + '-' + #root.args[2]")
-    public List<Node> queryNodesByType(final String branchId, final String locale, final String type, final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
+    public List<Node> queryNodesByType(final String branchId, final String locale, final String type,
+            final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
         log.debug(String.format("query nodes by type %s", type));
 
-        if (locale != null ) {
+        if (locale != null) {
             setLocale(locale);
         }
+
+        Pagination pagination = new Pagination();
+        pagination.setSkip(0);
+        pagination.setLimit(100);
+        pagination.getSorting().addSort("_system.modified_on.ms", -1);
 
         ObjectNode query = JsonUtil.createObject();
         query.put("_type", type);
         query.set("_features.f:translation", JsonUtil.createObject().put("$exists", Boolean.FALSE));
-        // query.set("_fields", JsonUtil.createObject().put("title", 1).put("_type", 1).put("_qname", 1));
-        
+        query.set("_fields", JsonUtil.createObject()
+            .put("title", 1)
+            .put("description", 1)
+            .put("_type", 1)
+            .put("_qname", 1)
+            .put("_system.modified_on.iso_8601", 1)
+        );
+
         List<Node> list = new ArrayList<>(1000);
-        getBranch(branchId).queryNodes(query, new Pagination(0, 1000)).forEach( (k, n) -> list.add((Node) n) );
+        getBranch(branchId).queryNodes(query, pagination).forEach((k, n) -> list.add((Node) n));
 
         return list;
     }
@@ -233,57 +248,87 @@ public class CloudcmsDriver {
      * @throws CloudCmsDriverBranchNotFoundException
      */
     @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#query.toString())")
-    public List<Node> queryNodes(final String branchId, final ObjectNode query, final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
+    public List<Node> queryNodes(final String branchId, final ObjectNode query, final Pagination pagination, final Boolean cacheResults)
+            throws CloudCmsDriverBranchNotFoundException {
         log.debug(String.format("query nodes %s", query));
 
         final Branch branch = getBranch(branchId);
-        final List<Node> list = new ArrayList<>(1000);
 
-        branch.queryNodes(query, new Pagination(0, 1000)).forEach( (k, n) -> list.add((Node) n) );
+        List<Node> list = new ArrayList<>(100);
+        branch.queryNodes(query, pagination != null ? pagination : new Pagination(0, 100)).forEach((k, n) -> list.add((Node) n));
 
         return list;
     }
 
-    // /**
-    //  * retrieve a node's attachment object
-    //  * 
-    //  * @param branchId
-    //  * @param locale
-    //  * @param id id of the node
-    //  * @param attachment id of the attachment
-    //  * 
-    //  * @return org.gitana.platform.client.attachment.Attachment
-    //  */
-    // @Cacheable(value = { "node-cache" }, keyGenerator = "nodeCacheKeyGenerator")
-    // public Attachment getDocumentAttachmentById(final String branchId, final String locale, final String nodeId, final String attachment) {
-    //     log.debug(String.format("get node attachment with id %s attachment %s and locale %s", id, attachment, locale));
+    /**
+     * retrieve a node's attachment object
+     *
+     * @param branchId
+     * @param locale
+     * @param id         id of the node
+     * @param attachment id of the attachment
+     *
+     * @return org.gitana.platform.client.attachment.Attachment
+     * @throws CloudCmsDriverBranchNotFoundException
+     */
+    @Cacheable(value = "attachment-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#nodeId).concat(#attachmentId)")
+    public Attachment getNodeAttachmentById(final String branchId, final String locale, final String nodeId,
+            final String attachmentId, final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
 
-    //     if (locale != null ) {
-    //         setLocale(locale);
-    //     }
+        log.debug("get attachment with id {} for node {}", attachmentId, nodeId);
 
-    //     return getBranch(branch).readNode(nodeId).listAttachments().get(attachment);
-    // }
+        if (locale != null) {
+            setLocale(locale);
+        }
 
-    // /**
-    //  * retrieve a node's attachment bytes
-    //  * 
-    //  * @param branchId
-    //  * @param locale
-    //  * @param id
-    //  * 
-    //  * @return Node
-    //  */
-    // @Cacheable(value = { "node-cache" }, keyGenerator = "nodeCacheKeyGenerator")
-    // public byte[] getDocumentAttachmentBytesById(final String branchId, final String locale, final String nodeId, final String attachment) {
-    //     log.debug(String.format("get node attachment with id %s attachment %s and locale %s", id, attachment, locale));
+        return getBranch(branchId).readNode(nodeId).listAttachments().get(attachmentId);
+    }
 
-    //     if (locale != null ) {
-    //         setLocale(locale);
-    //     }
-    //     getBranch(branch).readNode(nodeId).listAttachments().get(attachment).get
-    //     return getBranch(branch).readNode(id).downloadAttachment(attachment);
-    // }
+    /**
+     * retrieve a node's attachment bytes
+     * 
+     * @param branchId
+     * @param locale
+     * @param id
+     * 
+     * @return Node
+     */
+    @Cacheable(value = "attachment-cache", condition = "#cacheResults.equals(true)", key = "new org.springframework.cache.interceptor.SimpleKey(#branch, #locale, #nodeId, #attachmentId)")
+    public byte[] getDocumentAttachmentBytesById(final String branchId, final String locale, final String nodeId,
+            final String attachmentId, final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
+        // log.debug(String.format("get node attachment with id %s attachment %s and
+        // locale %s", id, attachment, locale));
+
+        if (locale != null) {
+            setLocale(locale);
+        }
+
+        return getBranch(branchId).readNode(nodeId).downloadAttachment(attachmentId);
+    }
+
+    /**
+     * retrieve a node's attachment preview bytes
+     * 
+     * @param branchId
+     * @param nodeId
+     * @param attachmentId
+     * @param mimetype
+     * @param cacheResults
+     * @return
+     * @throws Exception
+     */
+    @Cacheable(value = "attachment-cache", condition = "#cacheResults.equals(true)", key = "new org.springframework.cache.interceptor.SimpleKey(#branch, #nodeId, #attachmentId, #mimetype, #size)")
+    public byte[] getDocumentPreviewBytesById(final String branchId, final String nodeId, final String attachmentName,
+            final String mimetype, final String size, final Boolean cacheResults) throws Exception {
+
+        // generate the preview
+        final String previewUrl = String.format(
+                "/repositories/%s/branches/%s/nodes/%s/preview/_davita_%s_%s?attachment=%s&mimetype=%s&size=%s",
+                contentRepository.getId(), branchId, nodeId, attachmentName, size, attachmentName, mimetype, size);
+        getDriver().getRemote().downloadBytes(previewUrl);
+
+        return getBranch(branchId).readNode(nodeId).downloadAttachment(attachmentName);
+    }
 
     /**
      * sets the locale of the driver for all future API calls.
@@ -350,14 +395,17 @@ public class CloudcmsDriver {
     }
 
     // /**
-    //  * evict cache entries by nodeid or path (the method signitures match)
-    //  * 
-    //  * @param branch
-    //  * @param locale
-    //  * @param nodeId
-    //  */
-    // @CacheEvict(value = "node-cache", beforeInvocation = true, keyGenerator = "nodeCacheKeyGenerator")
-    // public void clearCacheKeyFromnode-cache(final String branch, final String locale, final String nodeId) {
-    //     log.info(String.format("evicting node from cache: branch: %s, locale: %s, nodeid: %s", branch, locale, nodeId));
+    // * evict cache entries by nodeid or path (the method signitures match)
+    // *
+    // * @param branch
+    // * @param locale
+    // * @param nodeId
+    // */
+    // @CacheEvict(value = "node-cache", beforeInvocation = true, keyGenerator =
+    // "nodeCacheKeyGenerator")
+    // public void clearCacheKeyFromnode-cache(final String branch, final String
+    // locale, final String nodeId) {
+    // log.info(String.format("evicting node from cache: branch: %s, locale: %s,
+    // nodeid: %s", branch, locale, nodeId));
     // }
 }

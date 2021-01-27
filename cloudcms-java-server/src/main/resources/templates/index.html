@@ -1,17 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    <link rel="icon" href="/favicon.png" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/assets/images/apple-touch-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/assets/images/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/images/apple-touch-icon-152x152.png" />
+    <link rel="apple-touch-icon-precomposed" href="/assets/images/apple-touch-icon-152x152.png" />
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-    <link href="css/home.css" rel="stylesheet">
+    <link href="/css/home.css" rel="stylesheet">
+
+    <script th:if="${hasPdf}" src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.4/pdfobject.min.js"
+        integrity="sha512-mW7siBAOOJTkMl77cTke1Krn+Wz8DJrjMzlKaorrGeGecq0DPUq28KgMrX060xQQOGjcl7MSSep+/1FOprNltw=="
+        crossorigin="anonymous">
+        </script>
+
+    <link th:if="${hasVideo}" href="https://vjs.zencdn.net/7.10.2/video-js.css" rel="stylesheet" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
         integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
         crossorigin="anonymous"></script>
+
+    <script th:if="${@environment.getProperty('pendo.enabled')}" th:inline="JavaScript">
+        (function (apiKey) {
+            (function (p, e, n, d, o) {
+                var v, w, x, y, z; o = p[d] = p[d] || {}; o._q = o._q || [];
+                v = ['initialize', 'identify', 'updateOptions', 'pageLoad', 'track']; for (w = 0, x = v.length; w < x; ++w)(function (m) {
+                    o[m] = o[m] || function () { o._q[m === v[0] ? 'unshift' : 'push']([m].concat([].slice.call(arguments, 0))); };
+                })(v[w]);
+                y = e.createElement(n); y.async = !0; y.src = 'https://cdn.pendo.io/agent/static/' + apiKey + '/pendo.js';
+                z = e.getElementsByTagName(n)[0]; z.parentNode.insertBefore(y, z);
+            })(window, document, 'script', 'pendo');
+
+            // Call this whenever information about your visitors becomes available
+            // Please use Strings, Numbers, or Bools for value types.
+            pendo.initialize({
+                visitor: {
+                    id: 'harry'   // Required if user is logged in
+                    // email:        // Recommended if using Pendo Feedback, or NPS Email
+                    // full_name:    // Recommended if using Pendo Feedback
+                    ,role: 'consumer'        // Optional
+
+                    // You can add any additional visitor level key-values here,
+                    // as long as it's not one of the above reserved names.
+                },
+
+                account: {
+                    id: 'document-consumer-account' // Highly recommended
+                    // name:         // Optional
+                    // is_paying:    // Recommended if using Pendo Feedback
+                    // monthly_value:// Recommended if using Pendo Feedback
+                    // planLevel:    // Optional
+                    // planPrice:    // Optional
+                    // creationDate: // Optional
+
+                    // You can add any additional account level key-values here,
+                    // as long as it's not one of the above reserved names.
+                }
+            });
+        })([[ ${@environment.getProperty('pendo.apiKey')} ]]);
+    </script>
+
     <title>Documents</title>
 </head>
 
@@ -23,26 +78,33 @@
                 <h1 class="my-4"></h1>
 
                 <div class="btn-group">
-                    <a th:href="@{/index?filter=day}" class="btn btn-primary"
-                        th:classappend="${filter.equals('1') ? 'active' : ''}" aria-current="page">Day</a>
-                    <a th:href="@{/index?filter=week}" class="btn btn-primary"
-                        th:classappend="${filter.equals('1') ? 'active' : ''}" aria-current="page">Week</a>
-                    <a th:href="@{/index?filter=Month}" class="btn btn-primary"
-                        th:classappend="${filter.equals('1') ? 'active' : ''}" aria-current="page">Month</a>
-                    <a th:href="@{/index?filter=all}" class="btn btn-primary"
-                        th:classappend="${filter.equals('all') ? 'active' : ''}" aria-current="page">All</a>
+                    <a th:href="@{/index?rangeFilter=day}" class="btn btn-primary"
+                        th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">Day</a>
+                    <a th:href="@{/index?rangeFilter=week}" class="btn btn-primary"
+                        th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">Week</a>
+                    <a th:href="@{/index?rangeFilter=Month}" class="btn btn-primary"
+                        th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">Month</a>
+                    <a th:href="@{/index?rangeFilter=all}" class="btn btn-primary"
+                        th:classappend="${rangeFilter.equals('all') ? 'active' : ''}" aria-current="page">All</a>
                 </div>
 
-                <h1 class="my-4"></h1>
+                <p th:text="${tags}"></p>
+
+                <div class="btn-group">
+                    <a th:each="tag : ${tags}" th:href="@{/index(tagFilter=${tag.get('tag')})}" th:text="${tag.get('title')}" class="btn btn-primary"
+                        th:classappend="${tagFilter.equals(tag.get('tag')) ? 'active' : ''}" aria-current="page"></a>
+                </div>
 
                 <div class="list-group">
                     <a th:each="doc : ${indexDocuments}" th:href="@{/index/{documentId}(documentId=${doc.getId()})}"
                         class="list-group-item list-group-item-action" aria-current="true"
                         th:classappend="${doc.getId().equals(id) ? 'active' : ''}">
                         <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1" th:text="${doc.getTitle()}"></h5>
+                            <h5 class="mb-1" th:text="${doc.title}"></h5>
                         </div>
-                        <p class="mb-1" th:text="${doc.getDescription()}"></p>
+
+                        <p th:if="${doc.description != ''}" class="mb-2" th:text="${doc.description}"></p>
+
                         <small class="x-format-date"
                             th:text="${doc.getSystemObject().get('modified_on').get('iso_8601').textValue()}"></small>
                     </a>
@@ -54,149 +116,60 @@
 
                 <div>
                     <h2 class="mb-1" th:text="${document.getTitle()}"></h2>
-                    <h2 class="mb-3" th:text="${document.getDescription()}"></h2>
-                    <h2 class="mb-3" th:each="customMetadataTag : ${document.get('metadata')}"
-                        th:text="${customMetadataTag.get('name').concat(': ').concat(customMetadataTag.get('value'))}">
-                    </h2>
+                    <p class="mb-3" th:text="${document.getDescription()}"></p>
+                    <p class="mb-3" th:each="customMetadataTag : ${document.get('metadata')}"
+                        th:text="${customMetadataTag.get('name').concat(customMetadataTag.get('value'))}">
+                    </p>
                 </div>
 
-                <!--  
-                    each relator document's "default" attachment
-                -->
+                <div th:each="attachment, attachmentIndex: ${attachments}">
+                    <div class="card my-4">
+                        <div class="card-body" th:attr="_type=${attachment.mimetype}">
 
-                <!-- <a th:each="attachment : ${attachments}" th:href="@{/index/{documentId}(documentId=${attachment.document.getId()})}" th:text="${attachment.document.getId()}"></a> -->
-                <div th:each="attachment: ${attachments}">
-                    <div th:if="${attachment.isVideo}">
-                        <h2>VIDEO</h2>
-                    </div>
-                    <div th:if="${attachment.isAudio}">
-                        <h2>AUDIO</h2>
-                    </div>
-                    <div th:if="${attachment.isPdf}">
-                        <h2>PDF</h2>
+                            <div th:inline="JavaScript" th:if="${attachment.isVideo}">
+                                <!-- video content -->
+                                <video th:id="'video'+${attachmentIndex.index}" class="video-js" controls preload="none"
+                                    width="100%">
+                                    <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
+                                        th:attr="type=${attachment.mimetype}" />
+                                </video>
+                            </div>
+
+                            <div th:if="${attachment.isAudio}">
+                                <!-- audio content -->
+                                <audio th:id="'video'+${attachmentIndex.index}" class="video-js" controls preload="none"
+                                    width="100%">
+                                    <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
+                                        th:attr="type=${attachment.mimetype}" />
+                                </audio>
+                            </div>
+
+                            <div th:if="${attachment.isPdf}">
+                                <!-- PDF content -->
+                                <div th:id="'pdf'+${attachmentIndex.index}">
+                                </div>
+                                <script th:inline="JavaScript">
+                                    var link = "[('/attachment/'+ ${attachment.id} + '?attachmentName=default')]";
+                                    PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
+                                        height: "750px",
+                                        forcePDFJS: true
+                                    });
+                                </script>
+                            </div>
+
+                            <div th:if="${!attachment.isPdf && !attachment.isPdf && !attachment.isPdf}">
+                                <!-- Other type of content -->
+                                <div th:id="'pdf'+${attachmentIndex.index}">
+                                </div>
+                                <script th:inline="JavaScript">
+                                    var link = "[('/preview/'+ ${attachment.id} + '?attachmentName=' + ${attachment.attachmentId} + '&mimetype=application/pdf&size=750)]";
+                                    PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], { height: "900px" });
+                                </script>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
-                <!--  
-                    /each relator document's "default" attachment
-                -->
-
-
-
-
-
-
-
-
-
-
-
-
-                
-                <div id="carouselExampleIndicators" class="carousel slide my-4" data-ride="carousel">
-                    <ol class="carousel-indicators">
-                        <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-                        <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-                        <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
-                    </ol>
-                    <div class="carousel-inner" role="listbox">
-                        <div class="carousel-item active">
-                            <img class="d-block img-fluid" src="http://placehold.it/900x350" alt="First slide">
-                        </div>
-                        <div class="carousel-item">
-                            <img class="d-block img-fluid" src="http://placehold.it/900x350" alt="Second slide">
-                        </div>
-                        <div class="carousel-item">
-                            <img class="d-block img-fluid" src="http://placehold.it/900x350" alt="Third slide">
-                        </div>
-                    </div>
-                    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Previous</span>
-                    </a>
-                    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Next</span>
-                    </a>
-                </div>
-
-                <div class="row">
-
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card h-100">
-                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
-                            <div class="card-body">
-                                <h4 class="card-title">
-                                    <a href="#">Item One</a>
-                                </h4>
-                                <h5>$24.99</h5>
-                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet
-                                    numquam aspernatur!
-                                </p>
-                            </div>
-                            <div class="card-footer">
-                                <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card h-100">
-                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
-                            <div class="card-body">
-                                <h4 class="card-title">
-                                    <a href="#">Item One</a>
-                                </h4>
-                                <h5>$24.99</h5>
-                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet
-                                    numquam aspernatur!
-                                </p>
-                            </div>
-                            <div class="card-footer">
-                                <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card h-100">
-                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
-                            <div class="card-body">
-                                <h4 class="card-title">
-                                    <a href="#">Item Two</a>
-                                </h4>
-                                <h5>$24.99</h5>
-                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet
-                                    numquam aspernatur!
-                                    Lorem ipsum dolor sit amet.</p>
-                            </div>
-                            <div class="card-footer">
-                                <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card h-100">
-                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
-                            <div class="card-body">
-                                <h4 class="card-title">
-                                    <a href="#">Item Three</a>
-                                </h4>
-                                <h5>$24.99</h5>
-                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet
-                                    numquam aspernatur!
-                                </p>
-                            </div>
-                            <div class="card-footer">
-                                <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-                <!-- /.row -->
-
             </div>
             <!-- /.col-lg-9 -->
 
@@ -206,13 +179,13 @@
     </div>
     <!-- /.container -->
 
-
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script>
         $(".x-format-date").each(function (index) {
             $(this).text(moment($(this).text()).format('LLLL'));
-        });        
+        });
     </script>
+    <script th:if="${hasVideo}" src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
 </body>
 
 </html>

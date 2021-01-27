@@ -113,7 +113,7 @@ public class CacheClearService {
                 query.set("_doc", JsonUtil.createObject().set("$in", JsonUtil.createArray(nodeList)));
 
                 try {
-                    driver.queryNodes(branchId, query, CloudcmsDriver.IGNORE_CACHE).forEach(node -> {
+                    driver.queryNodes(branchId, query, null, CloudcmsDriver.IGNORE_CACHE).forEach(node -> {
                         log.debug(String.format("node from invalidate query %s", node.getId()));
 
                         // remove all locales for this node from the cache
