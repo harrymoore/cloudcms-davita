@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AdminController {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+    static final Long MB = 1024l^2;
 
     @Autowired
     private CloudcmsDriver driver;
@@ -29,7 +30,7 @@ public class AdminController {
     private CacheClearService cacheClearService;
 
 
-    @GetMapping(value = "/clearcache")
+    @GetMapping(value = "/admin/clearcache")
     public @ResponseBody Map<String, String> clearcache() {
         log.trace("clearcache");
 
@@ -41,7 +42,7 @@ public class AdminController {
         return map;
     }
 
-    @GetMapping(value = "/health")
+    @GetMapping(value = { "/admin/health", "/admin/healthcheck", "/admin/hc" })
     public @ResponseBody Map<String, String> healthcheck1() {
         log.trace("health");
 
@@ -51,19 +52,7 @@ public class AdminController {
         return map;
     }
 
-    @GetMapping(value = "/healthcheck")
-    public @ResponseBody Map<String, String> healthcheck2() {
-        log.trace("healthcheck");
-
-        Map<String, String> map = new HashMap<>();
-        map.put("health", "ok");
-
-        return map;
-    }
-
-    static final Long MB = 1024l*1024l;
-
-    @GetMapping(value = "/ping")
+    @GetMapping(value = "/admin/ping")
     public @ResponseBody Map<String, String> healthcheck3() {
         log.trace("ping");
 
