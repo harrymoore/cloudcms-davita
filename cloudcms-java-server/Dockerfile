@@ -1,4 +1,4 @@
-FROM openjdk:15-jdk-slim
+FROM openjdk:11-jdk-slim
 
 EXPOSE 80
 
@@ -21,6 +21,6 @@ COPY docker-gitana.properties gitana.properties
 # RUN keytool -export -alias aClient -keystore clientKeyStore.key -rfc -file aClient.cert
 
 # ENV JAVA_OPTS="-Xmn2g -Xmx3g -server -Dspring.config.location=file:application.properties -Djavax.net.ssl.keyStore=clientKeyStore.key -Djavax.net.ssl.keyStorePassword=changeitX"
-ENV JAVA_OPTS="-Xmn2g -Xmx3g -server -Dspring.config.additional-location=file:docker-application.properties -Djavax.net.ssl.keyStore=clientKeyStore.key -Djavax.net.ssl.keyStorePassword=changeitX"
+ENV JAVA_OPTS="-Xmn2g -Xmx3g -server -Dspring.config.additional-location=file:docker-application.properties -Djavax.net.ssl.keyStore=clientKeyStore.key -Djavax.net.ssl.keyStorePassword=changeit"
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
