@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+
+    <title>Physician Communication</title>
 
     <link rel="icon" href="/favicon.png" type="image/x-icon" />
     <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
@@ -14,178 +16,179 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-    <link href="/css/home.css" rel="stylesheet">
 
-    <script th:if="${hasPdf}" src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.4/pdfobject.min.js"
-        integrity="sha512-mW7siBAOOJTkMl77cTke1Krn+Wz8DJrjMzlKaorrGeGecq0DPUq28KgMrX060xQQOGjcl7MSSep+/1FOprNltw=="
-        crossorigin="anonymous">
-        </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+        crossorigin="anonymous"></script>
 
     <link th:if="${hasVideo}" href="https://vjs.zencdn.net/7.10.2/video-js.css" rel="stylesheet" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
-        integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
-        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/home.css">
 
-    <script th:if="${@environment.getProperty('pendo.enabled')}" th:inline="JavaScript">
-        (function (apiKey) {
-            (function (p, e, n, d, o) {
-                var v, w, x, y, z; o = p[d] = p[d] || {}; o._q = o._q || [];
-                v = ['initialize', 'identify', 'updateOptions', 'pageLoad', 'track']; for (w = 0, x = v.length; w < x; ++w)(function (m) {
-                    o[m] = o[m] || function () { o._q[m === v[0] ? 'unshift' : 'push']([m].concat([].slice.call(arguments, 0))); };
-                })(v[w]);
-                y = e.createElement(n); y.async = !0; y.src = 'https://cdn.pendo.io/agent/static/' + apiKey + '/pendo.js';
-                z = e.getElementsByTagName(n)[0]; z.parentNode.insertBefore(y, z);
-            })(window, document, 'script', 'pendo');
-
-            // Call this whenever information about your visitors becomes available
-            // Please use Strings, Numbers, or Bools for value types.
-            pendo.initialize({
-                visitor: {
-                    id: 'harry'   // Required if user is logged in
-                    // email:        // Recommended if using Pendo Feedback, or NPS Email
-                    // full_name:    // Recommended if using Pendo Feedback
-                    ,role: 'consumer'        // Optional
-
-                    // You can add any additional visitor level key-values here,
-                    // as long as it's not one of the above reserved names.
-                },
-
-                account: {
-                    id: 'document-consumer-account' // Highly recommended
-                    // name:         // Optional
-                    // is_paying:    // Recommended if using Pendo Feedback
-                    // monthly_value:// Recommended if using Pendo Feedback
-                    // planLevel:    // Optional
-                    // planPrice:    // Optional
-                    // creationDate: // Optional
-
-                    // You can add any additional account level key-values here,
-                    // as long as it's not one of the above reserved names.
-                }
-            });
-        })([[ ${@environment.getProperty('pendo.apiKey')} ]]);
-    </script>
-
-    <title>Documents</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.4/pdfobject.min.js"
+        integrity="sha512-mW7siBAOOJTkMl77cTke1Krn+Wz8DJrjMzlKaorrGeGecq0DPUq28KgMrX060xQQOGjcl7MSSep+/1FOprNltw=="
+        crossorigin="anonymous">
+        </script>
 </head>
 
 <body>
-    <!-- Page Content -->
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3">
-                <h1 class="my-4"></h1>
+    <div class="container-fluid gx-0 gy-0 b-0 p-0 mt-1">
+        <div class="row gx-0 gy-0 b-0 p-0 m-0">
+            <div class="col gx-0 gy-0 b-0 p-0 m-0 text-center">
+                <button type="submit" class="btn btn-primary m-1 p-0 pl-1"
+                    th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">
+                    <a th:href="@{/index?rangeFilter=1}"></a>Day</button>
 
-                <div class="btn-group">
-                    <a th:href="@{/index?rangeFilter=day}" class="btn btn-primary"
-                        th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">Day</a>
-                    <a th:href="@{/index?rangeFilter=week}" class="btn btn-primary"
-                        th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">Week</a>
-                    <a th:href="@{/index?rangeFilter=Month}" class="btn btn-primary"
-                        th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">Month</a>
-                    <a th:href="@{/index?rangeFilter=all}" class="btn btn-primary"
-                        th:classappend="${rangeFilter.equals('all') ? 'active' : ''}" aria-current="page">All</a>
-                </div>
+                <button type="button" th:href="@{/index?rangeFilter=7}" class="btn btn-primary filter m-1 p-0 pl-1"
+                    th:classappend="${rangeFilter.equals('7') ? 'active' : ''}" aria-current="page">Week</button>
+                <button type="button" th:href="@{/index?rangeFilter=30}" class="btn btn-primary filter m-1 p-0 pl-1"
+                    th:classappend="${rangeFilter.equals('30') ? 'active' : ''}" aria-current="page">Month</button>
+            </div>
 
-                <p th:text="${tags}"></p>
+            <div class="col-12 gx-0 gy-0 b-0 p-0 m-0 text-center">
+                <button th:each="tag : ${tags}" th:href="@{/index(tagFilter=${tag.get('tag')})}"
+                    th:text="${tag.get('title')}" class="btn btn-primary m-1 mt-0 mb-0 p-1"
+                    th:classappend="${tagFilter}" aria-current="page">
+                </button>
+            </div>
+        </div>
+    </div>
 
-                <div class="btn-group">
-                    <a th:each="tag : ${tags}" th:href="@{/index(tagFilter=${tag.get('tag')})}" th:text="${tag.get('title')}" class="btn btn-primary"
-                        th:classappend="${tagFilter.equals(tag.get('tag')) ? 'active' : ''}" aria-current="page"></a>
-                </div>
-
-                <div class="list-group">
+    <div class="container-fluid">
+        <div class="row gx-1 gy-1">
+            <div class="col-xl-3 col-md-4 col-sm-12 gx-1 gy-1 vh-25">
+                <div class="list-group overflow-auto" height=100px>
                     <a th:each="doc : ${indexDocuments}" th:href="@{/index/{documentId}(documentId=${doc.getId()})}"
-                        class="list-group-item list-group-item-action" aria-current="true"
+                        class="list-group-item list-group-item-action m-1" aria-current="true"
                         th:classappend="${doc.getId().equals(id) ? 'active' : ''}">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1" th:text="${doc.title}"></h5>
                         </div>
 
-                        <p th:if="${doc.description != ''}" class="mb-2" th:text="${doc.description}"></p>
+                        <p th:if="${doc.description != ''}" class="m-1" th:text="${doc.description}"></p>
 
                         <small class="x-format-date"
                             th:text="${doc.getSystemObject().get('modified_on').get('iso_8601').textValue()}"></small>
                     </a>
                 </div>
+
             </div>
-            <!-- /.col-lg-3 -->
 
-            <div class="col-lg-9" th:if="${document != null}">
-
-                <div>
-                    <h2 class="mb-1" th:text="${document.getTitle()}"></h2>
-                    <p class="mb-3" th:text="${document.getDescription()}"></p>
-                    <p class="mb-3" th:each="customMetadataTag : ${document.get('metadata')}"
-                        th:text="${customMetadataTag.get('name').concat(customMetadataTag.get('value'))}">
-                    </p>
-                </div>
-
-                <div th:each="attachment, attachmentIndex: ${attachments}">
-                    <div class="card my-4">
-                        <div class="card-body" th:attr="_type=${attachment.mimetype}">
-
-                            <div th:inline="JavaScript" th:if="${attachment.isVideo}">
-                                <!-- video content -->
-                                <video th:id="'video'+${attachmentIndex.index}" class="video-js" controls preload="none"
-                                    width="100%">
-                                    <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
-                                        th:attr="type=${attachment.mimetype}" />
-                                </video>
-                            </div>
-
-                            <div th:if="${attachment.isAudio}">
-                                <!-- audio content -->
-                                <audio th:id="'video'+${attachmentIndex.index}" class="video-js" controls preload="none"
-                                    width="100%">
-                                    <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
-                                        th:attr="type=${attachment.mimetype}" />
-                                </audio>
-                            </div>
-
-                            <div th:if="${attachment.isPdf}">
-                                <!-- PDF content -->
-                                <div th:id="'pdf'+${attachmentIndex.index}">
-                                </div>
-                                <script th:inline="JavaScript">
-                                    var link = "[('/attachment/'+ ${attachment.id} + '?attachmentName=default')]";
-                                    PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
-                                        height: "750px",
-                                        forcePDFJS: true
-                                    });
-                                </script>
-                            </div>
-
-                            <div th:if="${!attachment.isPdf && !attachment.isPdf && !attachment.isPdf}">
-                                <!-- Other type of content -->
-                                <div th:id="'pdf'+${attachmentIndex.index}">
-                                </div>
-                                <script th:inline="JavaScript">
-                                    var link = "[('/preview/'+ ${attachment.id} + '?attachmentName=' + ${attachment.attachmentId} + '&mimetype=application/pdf&size=750)]";
-                                    PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], { height: "900px" });
-                                </script>
-                            </div>
-
-                        </div>
+            <div class="col-xl-9 col-md-8 col-sm-12">
+                <div class="card" th:if="${document == null && document.get('metadata') && document.get('metadata').size()>0}">
+                    <div class="card-body">
+                        <table class="table-sm table-borderless m-0 p-0 gy-0 gy-0">
+                            <tbody>
+                                <tr th:each="customMetadataTag : ${document.get('metadata')}">
+                                    <td class="text-start p-0" style="width: 125px;"
+                                        th:text="${customMetadataTag.get('name')}">
+                                    </td>
+                                    <td class="text-start p-0" th:text="${customMetadataTag.get('value')}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+
+                <div class="card" th:each="attachment, attachmentIndex: ${attachments}"
+                    th:attr="data-type=${attachment.mimetype}">
+
+                    <!-- Video content -->
+                    <div class="card-body md-4 p-0 m-0 gx-0 gy-0" th:inline="JavaScript" th:if="${attachment.isVideo}">
+                        <video __width="100%" __style="overflow: hidden;" th:id="'video'+${attachmentIndex.index}" class="video-js" data-setup='{"controls": true, "autoplay": false, "preload": "none"}'>
+                            <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
+                                th:attr="type=${attachment.mimetype}" />
+                        </video>
+                    </div>
+
+                    <!-- Audio content -->
+                    <div class="card-body" th:if="${attachment.isAudio}">
+                        <audio th:id="'audio'+${attachmentIndex.index}" class="" controls preload="none"
+                            width="100%">
+                            <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
+                                th:attr="type=${attachment.mimetype}" />
+                        </audio>
+                    </div>
+
+                    <!-- PDF content -->
+                    <div class="card-body" th:if="${attachment.isPdf}">
+                        <div th:id="'pdf'+${attachmentIndex.index}">
+                        </div>
+                    </div>
+
+                    <!-- Other type of content -->
+                    <div th:if="${!attachment.isPdf && !attachment.isAudio && !attachment.isVideo}">
+                        <div th:id="'pdf'+${attachmentIndex.index}">
+                        </div>
+                        <script th:inline="JavaScript">
+                            var link = [['/preview/'+ ${attachment.id} + '?disposition=attachment&attachmentName=' + ${attachment.attachmentId} + '&mimetype=application/pdf&size=750]];
+                            PDFObject.embed(link, [('#pdf' + ${ attachmentIndex.index })], { height: "900px" });
+                        </script>                        
+                    </div>
+
+                </div>
             </div>
-            <!-- /.col-lg-9 -->
-
         </div>
-        <!-- /.row -->
-
     </div>
-    <!-- /.container -->
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+        integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+        crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script>
+        // format dates
         $(".x-format-date").each(function (index) {
             $(this).text(moment($(this).text()).format('LLLL'));
         });
+
+        // handle filter buttons
+        $("button.filter").each(function (index) {
+            this.addEventListener('click', function (e) {
+                console.log("x");
+            });
+        })
     </script>
     <script th:if="${hasVideo}" src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
+    <script th:if="${@environment.getProperty('pendo.enabled')}" th:inline="JavaScript">
+            (function (apiKey) {
+                (function (p, e, n, d, o) {
+                    var v, w, x, y, z; o = p[d] = p[d] || {}; o._q = o._q || [];
+                    v = ['initialize', 'identify', 'updateOptions', 'pageLoad', 'track']; for (w = 0, x = v.length; w < x; ++w)(function (m) {
+                        o[m] = o[m] || function () { o._q[m === v[0] ? 'unshift' : 'push']([m].concat([].slice.call(arguments, 0))); };
+                    })(v[w]);
+                    y = e.createElement(n); y.async = !0; y.src = 'https://cdn.pendo.io/agent/static/' + apiKey + '/pendo.js';
+                    z = e.getElementsByTagName(n)[0]; z.parentNode.insertBefore(y, z);
+                })(window, document, 'script', 'pendo');
+
+                // Call this whenever information about your visitors becomes available
+                // Please use Strings, Numbers, or Bools for value types.
+                pendo.initialize({
+                    visitor: {
+                        id: 'harry'   // Required if user is logged in
+                        // email:        // Recommended if using Pendo Feedback, or NPS Email
+                        // full_name:    // Recommended if using Pendo Feedback
+                        , role: 'consumer'        // Optional
+
+                        // You can add any additional visitor level key-values here,
+                        // as long as it's not one of the above reserved names.
+                    },
+
+                    account: {
+                        id: 'document-consumer-account' // Highly recommended
+                        // name:         // Optional
+                        // is_paying:    // Recommended if using Pendo Feedback
+                        // monthly_value:// Recommended if using Pendo Feedback
+                        // planLevel:    // Optional
+                        // planPrice:    // Optional
+                        // creationDate: // Optional
+
+                        // You can add any additional account level key-values here,
+                        // as long as it's not one of the above reserved names.
+                    }
+                });
+            })([[${@environment.getProperty('pendo.apiKey') } ]]);
+    </script>
+    <script th:if="${@environment.getProperty('keycloak.js-url')}" th:inline="JavaScript" src=[[${@environment.getProperty('keycloak.js-url') } ]]>
 </body>
 
 </html>
