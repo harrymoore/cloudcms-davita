@@ -1,0 +1,34 @@
+version: "2"
+
+services:
+  postgres:
+    build: ./postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - cloudcms
+    environment:
+      # - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_PASSWORD=keycloak
+      - POSTGRES_USER=keycloak
+
+  keycloak:
+    build: ./keycloak
+    networks:
+      - cloudcms
+    ports:
+      - "9090:8080"
+    volumes:
+      - ../keycloak:/opt/jboss/keycloak/imports
+    # command:
+    #   - "-b 0.0.0.0 -Dkeycloak.import=/opt/jboss/keycloak/imports/realm-export.json"
+    environment:
+      - KEYCLOAK_USER=keycloak
+      - KEYCLOAK_PASSWORD=keycloak
+      - DB_ADDR=postgres
+      - DB_USER=keycloak
+      - DB_PASSWORD=keycloak
+
+networks:
+  cloudcms:
+    driver: bridge

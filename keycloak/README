@@ -1,0 +1,5 @@
+
+docker-compose up --build --force-recreate --remove-orphans -d
+docker-compose logs -f --tail=500 keycloak
+
+docker-compose stop
