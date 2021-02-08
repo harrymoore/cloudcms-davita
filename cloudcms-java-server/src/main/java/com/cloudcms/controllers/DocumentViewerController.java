@@ -33,13 +33,16 @@ public class DocumentViewerController {
     private static final String VIEW_NAME = "index";
     private static final String NODE_TYPE = "davita:document";
 
-    @GetMapping(value = { "", "/", "/index", "index/{id}", "index.html/{id}" })
-    // @Cacheable(value = "page-cache", condition = "null == #cacheResults ? true :
-    // #cacheResults.equals('true')", key = "#branch + '-' + #id + '-' + #metadata")
+    @GetMapping(value = { "", "/", "index.html" })
+    public String redirectToRoot() {
+        return "redirect:/index";
+    }
+
+    @GetMapping(value = { "/index", "index/{id}" })
     public String getDocument(@PathVariable(required = false) final String id,
             @RequestParam(required = false) final String branch, 
             @RequestParam(required = false) final String metadata,
-            @RequestParam(required = false, defaultValue = "all") final String rangeFilter,
+            @RequestParam(required = false) final String rangeFilter,
             @RequestParam(required = false, defaultValue = "") final String tagFilter,
             @RequestParam(required = false, defaultValue = "true") final String useCache, 
             final Model map)
@@ -50,18 +53,19 @@ public class DocumentViewerController {
         // retrieve only metadata. not a binary attachment
         // Boolean includeMetadata = Boolean.parseBoolean(metadata);
 
-        map.addAttribute("rangeFilter", rangeFilter);
-        map.addAttribute("tagFilter", tagFilter);
+        map.addAttribute("rangeFilter", rangeFilter == null ? "" : rangeFilter);
+        map.addAttribute("tagFilter", tagFilter == null ? "" : tagFilter);
 
         final Boolean cache = Boolean.parseBoolean(useCache);
 
         // add the list of documents to the model so that an index can be built
-        List<Node> nodes = driver.queryNodesByType(driver.getBranch(branch).getId(), driver.getLocale(), NODE_TYPE, cache);
+        List<Node> nodes = driver.queryNodesByType(driver.getBranch(branch).getId(), rangeFilter, tagFilter, NODE_TYPE, cache);
         map.addAttribute("indexDocuments", nodes);
 
         Boolean hasVideo = false;
         Boolean hasAudio = false;
         Boolean hasPdf = false;
+        Boolean hasImage = false;
 
         // add the requested document, if it exists, to the model
         if (null != id && !id.isEmpty()) {
@@ -71,25 +75,38 @@ public class DocumentViewerController {
             // for each "document" relator item, gather info about the related node and it's "default" attachment
             List<Map<String,String>> relatedDocuments = (List<Map<String,String>>)node.get("document");
             for(Map<String,String> doc : relatedDocuments) {
-                log.debug("{} {}", doc.get("id"), doc.get("ref"));
-                Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branch).getId(), driver.getLocale(), (String)doc.get("id"), "default", cache);
+                Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branch).getId(), (String)doc.get("id"), "default", cache);
+
+                boolean isOther = true;
 
                 doc.put("id", doc.get("id"));
                 doc.put("attachmentId", attachment.getId());
                 doc.put("mimetype", attachment.getContentType());
-                doc.put("isVideo", String.valueOf(attachment.getContentType().startsWith("video/")));
+                doc.put("isVideo", String.valueOf(attachment.getContentType().startsWith("video/") 
+                    || attachment.getContentType().endsWith("/ogg") 
+                    || attachment.getContentType().endsWith("/ogv")));
                 doc.put("isAudio", String.valueOf(attachment.getContentType().startsWith("audio/")));
                 doc.put("isPdf", String.valueOf(attachment.getContentType().endsWith("/pdf")));
+                doc.put("isImage", String.valueOf(attachment.getContentType().startsWith("image/")));
 
                 if (Boolean.parseBoolean(doc.get("isVideo"))) {
                     hasVideo = true;
+                    isOther = false;
                 }
                 if (Boolean.parseBoolean(doc.get("isAudio"))) {
                     hasAudio = true;
+                    isOther = false;
                 }
                 if (Boolean.parseBoolean(doc.get("isPdf"))) {
                     hasPdf = true;
+                    isOther = false;
                 }
+                if (Boolean.parseBoolean(doc.get("isImage"))) {
+                    hasImage = true;
+                    isOther = false;
+                }                
+
+                doc.put("isOther", String.valueOf(isOther));
             }
 
             map.addAttribute("attachments", relatedDocuments);
@@ -97,6 +114,7 @@ public class DocumentViewerController {
             map.addAttribute("hasVideo", hasVideo);
             map.addAttribute("hasAudio", hasAudio);
             map.addAttribute("hasPdf", hasPdf);
+            map.addAttribute("hasImage", hasImage);
         }
         else
         {

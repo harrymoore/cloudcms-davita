@@ -93,7 +93,9 @@ public class CloudcmsDriver {
         contentRepository = (Repository) project.getStack().readDataStore("content");
 
         driver = DriverContext.getDriver();
-        ((RemoteImpl) driver.getRemote()).setPaths(true);
+        ((RemoteImpl) driver.getRemote()).setPaths(false);
+        ((RemoteImpl) driver.getRemote()).setMetadata(true);
+        ((RemoteImpl) driver.getRemote()).setFull(true);
         locale = new Locale(defaultLocale);
         DriverContext.getDriver().setLocale(locale);
 
@@ -178,27 +180,6 @@ public class CloudcmsDriver {
     }
 
     /**
-     * retrieve a node by its path
-     * 
-     * @param branchId
-     * @param locale
-     * @param path
-     * 
-     * @return Node
-     */
-    @Cacheable(value = "node-cache", condition = "#cacheResults.equals(true)", key = "new org.springframework.cache.interceptor.SimpleKey(#branch, #locale, #path)")
-    public Node getNodeByPath(final String branchId, final String locale, final String path, final Boolean cacheResults)
-            throws CloudCmsDriverBranchNotFoundException {
-        log.debug(String.format("get node with path %s", path));
-
-        if (locale != null) {
-            setLocale(locale);
-        }
-
-        return (Node) getBranch(branchId).readNode("root", path);
-    }
-
-    /**
      * query for nodes by type qname (ex.: "n:node")
      * 
      * @param branchId
@@ -208,14 +189,10 @@ public class CloudcmsDriver {
      * @return
      * @throws CloudCmsDriverBranchNotFoundException
      */
-    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName + '-' + #root.args[0] + '-' + #root.args[1] + '-' + #root.args[2]")
-    public List<Node> queryNodesByType(final String branchId, final String locale, final String type,
-            final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
+    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName + #root.args[0] + #root.args[1] + #root.args[2] + #root.args[3]")
+    public List<Node> queryNodesByType(final String branchId, final String rangeFilter, final String tagFilter,
+            final String type, final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
         log.debug(String.format("query nodes by type %s", type));
-
-        if (locale != null) {
-            setLocale(locale);
-        }
 
         Pagination pagination = new Pagination();
         pagination.setSkip(0);
@@ -225,13 +202,23 @@ public class CloudcmsDriver {
         ObjectNode query = JsonUtil.createObject();
         query.put("_type", type);
         query.set("_features.f:translation", JsonUtil.createObject().put("$exists", Boolean.FALSE));
+
+        if (rangeFilter != null) {
+            long ms = (System.currentTimeMillis() * 1000) - (Integer.parseInt(rangeFilter) * 86400000l);
+            query.put("_system.modified_on.ms", JsonUtil.createObject().put("$gt", ms));
+        }
+
+        if (!tagFilter.isEmpty()) {
+            query.put("tags", tagFilter);
+        }
+
         query.set("_fields", JsonUtil.createObject()
             .put("title", 1)
             .put("description", 1)
+            .put("tags", 1)
             .put("_type", 1)
             .put("_qname", 1)
-            .put("_system.modified_on.iso_8601", 1)
-        );
+            .put("_system.modified_on.iso_8601", 1));
 
         List<Node> list = new ArrayList<>(1000);
         getBranch(branchId).queryNodes(query, pagination).forEach((k, n) -> list.add((Node) n));
@@ -248,14 +235,15 @@ public class CloudcmsDriver {
      * @throws CloudCmsDriverBranchNotFoundException
      */
     @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#query.toString())")
-    public List<Node> queryNodes(final String branchId, final ObjectNode query, final Pagination pagination, final Boolean cacheResults)
-            throws CloudCmsDriverBranchNotFoundException {
+    public List<Node> queryNodes(final String branchId, final ObjectNode query, final Pagination pagination,
+            final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
         log.debug(String.format("query nodes %s", query));
 
         final Branch branch = getBranch(branchId);
 
         List<Node> list = new ArrayList<>(100);
-        branch.queryNodes(query, pagination != null ? pagination : new Pagination(0, 100)).forEach((k, n) -> list.add((Node) n));
+        branch.queryNodes(query, pagination != null ? pagination : new Pagination(0, 100))
+                .forEach((k, n) -> list.add((Node) n));
 
         return list;
     }
@@ -272,14 +260,10 @@ public class CloudcmsDriver {
      * @throws CloudCmsDriverBranchNotFoundException
      */
     @Cacheable(value = "attachment-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#nodeId).concat(#attachmentId)")
-    public Attachment getNodeAttachmentById(final String branchId, final String locale, final String nodeId,
-            final String attachmentId, final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
+    public Attachment getNodeAttachmentById(final String branchId, final String nodeId, final String attachmentId,
+            final Boolean cacheResults) throws CloudCmsDriverBranchNotFoundException {
 
         log.debug("get attachment with id {} for node {}", attachmentId, nodeId);
-
-        if (locale != null) {
-            setLocale(locale);
-        }
 
         return getBranch(branchId).readNode(nodeId).listAttachments().get(attachmentId);
     }
@@ -325,9 +309,8 @@ public class CloudcmsDriver {
         final String previewUrl = String.format(
                 "/repositories/%s/branches/%s/nodes/%s/preview/_davita_%s_%s?attachment=%s&mimetype=%s&size=%s",
                 contentRepository.getId(), branchId, nodeId, attachmentName, size, attachmentName, mimetype, size);
-        getDriver().getRemote().downloadBytes(previewUrl);
 
-        return getBranch(branchId).readNode(nodeId).downloadAttachment(attachmentName);
+        return getDriver().getRemote().downloadBytes(previewUrl);
     }
 
     /**

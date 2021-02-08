@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ContentDisposition.Builder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -32,27 +33,28 @@ public class StaticController {
      * Return the default attachment (if found) of the node identified by id
      * 
      * @param id
-     * @param branch
+     * @param branchId
      * @param locale
      * @param attachmentName Optional id of the attachment. default is "default"
      * @param metadata
      * @return
      */
-    @GetMapping(value = "/attachment/{id}")
-    public @ResponseBody ResponseEntity<byte[]> staticById(@PathVariable final String id,
-            @RequestParam(required = false) final String branch, 
-            @RequestParam(required = false) final String locale,
+    @GetMapping(value = "/attachment/{nodeId}")
+    public @ResponseBody ResponseEntity<byte[]> staticById(@PathVariable final String nodeId,
+            @RequestParam(required = false) final String branchId, 
             @RequestParam(required = false) final String attachmentName,
             @RequestParam(required = false) final String name,
-            @RequestAttribute(required = false) final Boolean metadata) throws CloudCmsDriverBranchNotFoundException {
+            @RequestParam(required = false, defaultValue = "inline") final String disposition,
+            @RequestAttribute(required = false) final Boolean metadata) 
+                throws CloudCmsDriverBranchNotFoundException {
         
-        log.debug("{} {} {}", branch, locale, id);
-
-        final Node node = driver.getNodeById(driver.getBranch(branch).getId(), driver.getLocale(locale), id, CloudcmsDriver.USE_CACHE);
+        final Node node = driver.getNodeById(driver.getBranch(branchId).getId(), null, nodeId, CloudcmsDriver.USE_CACHE);
         final Attachment attachment = node.listAttachments().get(attachmentName == null ? "default" : attachmentName);
+        final Builder dispositionBuilder = disposition.equalsIgnoreCase("inline") ? ContentDisposition.inline() : ContentDisposition.attachment();
+        final String fileName = (name != null ? name : node.getTitle());
 
         return ResponseEntity.ok()
-            .header("Content-Disposition", ContentDisposition.inline().filename(name != null ? name : node.getTitle()).build().toString())
+            .header("Content-Disposition", dispositionBuilder.filename(fileName).build().toString())
             .contentLength(attachment.getLength())
             .contentType(MediaType.parseMediaType(attachment.getContentType()))
             .body(node.downloadAttachment(attachmentName == null ? "default" : attachmentName));        
@@ -70,60 +72,25 @@ public class StaticController {
      * @return
      * @throws Exception
      */
-    @GetMapping(value = "/preview/{id}")
+    @GetMapping(value = "/preview/{nodeId}")
     public @ResponseBody ResponseEntity<byte[]> previewById(@PathVariable final String nodeId,
             @RequestParam(required = false) final String branchId,
             @RequestParam(required = true) final String attachmentName,
-            @RequestParam(required = false, defaultValue = "default") final String name,
+            @RequestParam(required = false, defaultValue = "") final String name,
             @RequestParam(required = true) final String mimetype, @RequestParam(required = true) final String size,
-            @RequestAttribute(required = false) final Boolean metadata) throws Exception {
+            @RequestParam(required = false, defaultValue = "inline") final String disposition,
+            @RequestAttribute(required = false) final Boolean metadata) 
+                throws Exception {
         
-        log.debug("{} {} {}", branchId, attachmentName, nodeId);
+        final Node node = driver.getNodeById(driver.getBranch(branchId).getId(), null, nodeId, CloudcmsDriver.USE_CACHE);
+        final Builder dispositionBuilder = disposition.equalsIgnoreCase("inline") ? ContentDisposition.inline() : ContentDisposition.attachment();
+        final String fileName = (!name.isEmpty() ? name : node.getTitle());
+        final byte[] bytes = driver.getDocumentPreviewBytesById(driver.getBranch(branchId).getId(), nodeId, attachmentName, mimetype, size, CloudcmsDriver.USE_CACHE);
 
         return ResponseEntity.ok()
-            .header("Content-Disposition", ContentDisposition.inline().filename(name).build().toString())
+            .header("Content-Disposition", dispositionBuilder.filename(fileName).build().toString())
+            .contentLength(bytes.length)
             .contentType(MediaType.parseMediaType(mimetype))
-            .body(driver.getDocumentPreviewBytesById(branchId, nodeId, attachmentName, mimetype, size, CloudcmsDriver.USE_CACHE));        
+            .body(bytes);        
     }
-
-    /**
-     * Return the default attachment (if found) of the node identified by path
-     * 
-     * @param id
-     * @param branch
-     * @param locale
-     * @param metadata
-     * @return
-     */
-    @GetMapping(value = "/static/path/{path}")
-    public @ResponseBody ResponseEntity<byte[]> staticByPath(@PathVariable final String path,
-            @RequestParam(required = false) final String branch, 
-            @RequestParam(required = false) final String locale,
-            @RequestParam(required = false) final String attachmentName,
-            @RequestParam(required = false) final String name,
-            @RequestAttribute(required = false) final Boolean metadata) throws CloudCmsDriverBranchNotFoundException {
-
-        log.debug("{} {} {}", branch, locale, path);
-
-        final Node node = driver.getNodeByPath(driver.getBranch(branch).getId(), driver.getLocale(locale), path, CloudcmsDriver.USE_CACHE);
-        final Attachment attachment = node.listAttachments().get(attachmentName == null ? "default" : attachmentName);
-
-        return ResponseEntity.ok()
-            .header("Content-Disposition", "attachment; filename=" + (name == null ? name : node.getTitle()))
-            .contentLength(attachment.getLength())
-            .contentType(MediaType.parseMediaType(attachment.getContentType()))
-            .body(node.downloadAttachment(attachmentName == null ? "default" : attachmentName));        
-    }
-
-    // @GetMapping(value = "/preview/node/{id}")
-    // public @ResponseBody String previewyNodeId(@PathVariable String node,
-    // @RequestAttribute Boolean metadata) {
-    // return "ok";
-    // }
-
-    // @GetMapping(value = "/preview/path/{path}")
-    // public @ResponseBody String previewByPath(@PathVariable String path,
-    // @RequestAttribute Boolean metadata) {
-    // return "ok";
-    // }
 }
