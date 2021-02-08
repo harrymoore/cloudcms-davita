@@ -57,7 +57,7 @@
     <div class="container-fluid">
         <div class="row gx-1 gy-1">
             <div class="col-xl-3 col-md-4 col-sm-12 gx-1 gy-1 vh-25">
-                <div class="list-group overflow-auto" height=100px>
+                <div class="list-group" height=100px>
                     <a th:each="doc : ${indexDocuments}" th:href="@{/index/{documentId}(documentId=${doc.getId()})}"
                         class="list-group-item list-group-item-action m-1" aria-current="true"
                         th:classappend="${doc.getId().equals(id) ? 'active' : ''}">
@@ -75,7 +75,8 @@
             </div>
 
             <div class="col-xl-9 col-md-8 col-sm-12">
-                <div class="card" th:if="${document == null && document.get('metadata') && document.get('metadata').size()>0}">
+                <div class="card"
+                    th:if="${document == null && document.get('metadata') && document.get('metadata').size()>0}">
                     <div class="card-body">
                         <table class="table-sm table-borderless m-0 p-0 gy-0 gy-0">
                             <tbody>
@@ -91,41 +92,58 @@
                 </div>
 
                 <div class="card" th:each="attachment, attachmentIndex: ${attachments}"
-                    th:attr="data-type=${attachment.mimetype}">
+                    th:attr="data-davita-type=${attachment.mimetype}">
 
-                    <!-- Video content -->
                     <div class="card-body md-4 p-0 m-0 gx-0 gy-0" th:inline="JavaScript" th:if="${attachment.isVideo}">
-                        <video __width="100%" __style="overflow: hidden;" th:id="'video'+${attachmentIndex.index}" class="video-js" data-setup='{"controls": true, "autoplay": false, "preload": "none"}'>
+                        <!-- Video content -->
+                        <video-js __width="100%" __style="overflow: hidden;" th:id="'video'+${attachmentIndex.index}"
+                            class="video-js" data-setup='{"controls": true, "autoplay": false, "preload": "none"}'>
                             <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
                                 th:attr="type=${attachment.mimetype}" />
-                        </video>
+                        </video-js>
                     </div>
 
-                    <!-- Audio content -->
                     <div class="card-body" th:if="${attachment.isAudio}">
-                        <audio th:id="'audio'+${attachmentIndex.index}" class="" controls preload="none"
+                        <!-- Audio content -->
+                        <audio th:id="'audio'+${attachmentIndex.index}" class="video-js" controls preload="none"
                             width="100%">
                             <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
                                 th:attr="type=${attachment.mimetype}" />
                         </audio>
                     </div>
 
-                    <!-- PDF content -->
-                    <div class="card-body" th:if="${attachment.isPdf}">
+                    <div th:if="${attachment.isPdf}">
+                        <!-- PDF content -->
                         <div th:id="'pdf'+${attachmentIndex.index}">
                         </div>
-                    </div>
 
-                    <!-- Other type of content -->
-                    <div th:if="${!attachment.isPdf && !attachment.isAudio && !attachment.isVideo}">
-                        <div th:id="'pdf'+${attachmentIndex.index}">
-                        </div>
                         <script th:inline="JavaScript">
-                            var link = [['/preview/'+ ${attachment.id} + '?disposition=attachment&attachmentName=' + ${attachment.attachmentId} + '&mimetype=application/pdf&size=750]];
-                            PDFObject.embed(link, [('#pdf' + ${ attachmentIndex.index })], { height: "900px" });
-                        </script>                        
+                            var link = "[('/attachment/'+ ${attachment.id} + '?attachmentName=default')]";
+                            PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
+                                height: "750px",
+                                forcePDFJS: true
+                            });
+                        </script>
                     </div>
 
+                    <div class="card-body" th:if="${attachment.isImage}">
+                        <!-- Image content -->
+                        <img class="img" th:attr="src='/attachment/'+ ${attachment.id} + '?attachmentName=default'">
+                    </div>
+
+                    <div th:if="${attachment.isOther}">
+                        <!-- Other type of content -->
+                        <div th:id="'pdf'+${attachmentIndex.index}">
+                        </div>
+
+                        <script th:inline="JavaScript">
+                            var link = "[('/preview/'+ ${attachment.id} + '?attachmentName=default&mimetype=application/pdf&size=400')]";
+                            PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
+                                height: "750px",
+                                forcePDFJS: true
+                            });
+                        </script>
+                    </div>
                 </div>
             </div>
         </div>
@@ -148,7 +166,7 @@
             });
         })
     </script>
-    <script th:if="${hasVideo}" src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
+    <script th:if="${hasVideo || hasAudio}" src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
     <script th:if="${@environment.getProperty('pendo.enabled')}" th:inline="JavaScript">
             (function (apiKey) {
                 (function (p, e, n, d, o) {
@@ -188,7 +206,21 @@
                 });
             })([[${@environment.getProperty('pendo.apiKey') } ]]);
     </script>
-    <script th:if="${@environment.getProperty('keycloak.js-url')}" th:inline="JavaScript" src=[[${@environment.getProperty('keycloak.js-url') } ]]>
+
+    <script th:if="${@environment.getProperty('keycloak-js.enabled')}"
+        th:attr="src=${@environment.getProperty('keycloak-js.location')}">
+        </script>
+
+    <script th:if="${@environment.getProperty('keycloak-js.enabled')}">
+        $(document).ready(function () {
+            var keycloak = new Keycloak();
+            keycloak.init().then(function (authenticated) {
+                alert(authenticated ? 'authenticated' : 'not authenticated');
+            }).catch(function () {
+                alert('failed to initialize');
+            });
+        });        
+    </script>
 </body>
 
 </html>
