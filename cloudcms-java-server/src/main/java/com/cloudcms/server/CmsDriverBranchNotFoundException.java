@@ -3,10 +3,10 @@
  */
 package com.cloudcms.server;
 
-public class CloudCmsDriverBranchNotFoundException extends CloudCmsDriverException {
+public class CmsDriverBranchNotFoundException extends CmsDriverException {
     private static final long serialVersionUID = 1L;
 
-    public CloudCmsDriverBranchNotFoundException(final String branchId) {
+    public CmsDriverBranchNotFoundException(final String branchId) {
         super(String.format("Branch with id % not found", branchId));
     }
 }
