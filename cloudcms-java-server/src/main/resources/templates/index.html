@@ -32,9 +32,9 @@
 </head>
 
 <body>
-    <div class="container-fluid gx-0 gy-0 b-0 p-0 mt-1">
-        <div class="row gx-0 gy-0 b-0 p-0 m-0">
-            <div class="col gx-0 gy-0 b-0 p-0 m-0 text-center">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col text-center">
                 <button type="submit" class="btn btn-primary m-1 p-0 pl-1"
                     th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">
                     <a th:href="@{/index?rangeFilter=1}"></a>Day</button>
@@ -45,7 +45,7 @@
                     th:classappend="${rangeFilter.equals('30') ? 'active' : ''}" aria-current="page">Month</button>
             </div>
 
-            <div class="col-12 gx-0 gy-0 b-0 p-0 m-0 text-center">
+            <div class="col-12 text-center">
                 <button th:each="tag : ${tags}" th:href="@{/index(tagFilter=${tag.get('tag')})}"
                     th:text="${tag.get('title')}" class="btn btn-primary m-1 mt-0 mb-0 p-1"
                     th:classappend="${tagFilter}" aria-current="page">
@@ -54,34 +54,44 @@
         </div>
     </div>
 
-    <!-- <p>_<span th:text="${document.getId()}"></span>_</p>
-    <p th:text="${indexDocuments}"></p> -->
+    <!-- <p>_<span th:text="${document.getId()}"></span>_</p> -->
+    <!-- <p th:text="${indexDocuments}"></p> -->
 
     <div class="container-fluid">
-        <div class="row gx-1 gy-1">
-            <div class="col-xl-3 col-md-4 col-sm-12 gx-1 gy-1 vh-25">
-                <div class="list-group" height=100px>
-                    <a th:each="doc : ${indexDocuments}" th:href="@{/index/{documentId}(documentId=${doc.getId()})}"
-                        class="list-group-item list-group-item-action m-1" aria-current="true"
-                        th:classappend="${doc.getId().equals(document.getId()) ? 'active' : ''}">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1" th:text="${doc.title}"></h5>
+        <div class="row">
+            <div class="col-xl-3 col-md-4 col-sm-12">
+                <div class="list-group">
+                    <a th:each="doc : ${indexDocuments}" 
+                        th:href="@{/index/{documentId}(documentId=${doc.getId()})}"
+                        th:text="${doc.title}"
+                        class="list-group-item list-group-item-action" aria-current="true"
+                        th:classappend="${doc.getId().equals(document == null ? '' : document.getId()) ? 'active' : ''}">
+                        
+                        <!-- <div class="d-flex justify-content-between">
+                            <h5 class="" th:text="${doc.title}"></h5>
                         </div>
 
-                        <p th:if="${doc.description != ''}" class="m-1" th:text="${doc.description}"></p>
+                        <p th:if="${doc.description != ''}" class="" th:text="${doc.description}"></p> -->
 
-                        <small class="x-format-date"
-                            th:text="${doc.getSystemObject().get('modified_on').get('iso_8601').textValue()}"></small>
+                        <!-- <p><small class="x-format-date"
+                            th:text="${doc.getSystemObject().get('modified_on').get('iso_8601').textValue()}"></small></p> -->
                     </a>
                 </div>
 
             </div>
 
-            <div class="col-xl-9 col-md-8 col-sm-12">
-                <div class="card"
-                    th:if="${document == null && document.get('metadata') && document.get('metadata').size()>0}">
+            <div th:if="${document != null}" class="col-xl-9 col-md-8 col-sm-12">
+                <div class="card p-0 m-1">
                     <div class="card-body">
-                        <table class="table-sm table-borderless m-0 p-0 gy-0 gy-0">
+                        <h2 th:text="${document.title}"></h2>
+                        <h5 class="x-format-date"
+                            th:text="${document.getSystemObject().get('modified_on').get('iso_8601').textValue()}"></h5>
+                    </div>
+                </div>
+
+                <div class="card p-0 m-1" th:if="${document.get('metadata') != null && document.get('metadata').size()>0}">
+                    <div class="card-body">
+                        <table class="table-sm table-borderless">
                             <tbody>
                                 <tr th:each="customMetadataTag : ${document.get('metadata')}">
                                     <td class="text-start p-0" style="width: 125px;"
@@ -94,13 +104,13 @@
                     </div>
                 </div>
 
-                <div class="card" th:each="attachment, attachmentIndex: ${attachments}"
+                <div class="card p-0 m-1" th:each="attachment, attachmentIndex: ${attachments}"
                     th:attr="data-davita-type=${attachment.mimetype}">
 
-                    <div class="card-body md-4 p-0 m-0 gx-0 gy-0" th:inline="JavaScript" th:if="${attachment.isVideo}">
+                    <div class="card-body" th:inline="JavaScript" th:if="${attachment.isVideo}">
                         <!-- Video content -->
-                        <video-js __width="100%" __style="overflow: hidden;" th:id="'video'+${attachmentIndex.index}"
-                            class="video-js" data-setup='{"controls": true, "autoplay": false, "preload": "auto"}'>
+                        <video-js ____width="100%" height="auto"  __style="overflow: hidden;" th:id="'video'+${attachmentIndex.index}"
+                            class="video-js vjs-default-skin" data-setup='{"controls": true, "fluid": true, "autoplay": false, "preload": "auto"}'>
                             <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentId=default'"
                                 th:attr="type=${attachment.mimetype}" />
                         </video-js>
@@ -108,7 +118,7 @@
 
                     <div class="card-body" th:if="${attachment.isAudio}">
                         <!-- Audio content -->
-                        <audio th:id="'audio'+${attachmentIndex.index}" class="video-js" controls preload="auto"
+                        <audio th:id="'audio'+${attachmentIndex.index}" class="audio-js" controls preload="auto"
                             width="100%">
                             <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentId=default'"
                                 th:attr="type=${attachment.mimetype}" />
@@ -159,7 +169,7 @@
     <script>
         // format dates
         $(".x-format-date").each(function (index) {
-            $(this).text(moment($(this).text()).format('LLLL'));
+            $(this).text(moment($(this).text()).format('L'));
         });
 
         // handle filter buttons
