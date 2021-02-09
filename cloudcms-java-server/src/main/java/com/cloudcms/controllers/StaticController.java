@@ -49,15 +49,18 @@ public class StaticController {
                 throws CmsDriverBranchNotFoundException {
         
         final Node node = driver.getNodeById(driver.getBranch(branchId).getId(), nodeId, CloudcmsDriver.USE_CACHE);
-        final Attachment attachment = node.listAttachments().get(attachmentId == null ? "default" : attachmentId);
+        final Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branchId).getId(), nodeId, attachmentId == null ? "default" : attachmentId, CloudcmsDriver.USE_CACHE);
+
         final Builder dispositionBuilder = disposition.equalsIgnoreCase("inline") ? ContentDisposition.inline() : ContentDisposition.attachment();
         final String fileName = (name != null ? name : node.getTitle());
+
+        final byte[] bytes = driver.getDocumentAttachmentBytesById(driver.getBranch(branchId).getId(), nodeId, attachmentId == null ? "default" : attachmentId, CloudcmsDriver.USE_CACHE);
 
         return ResponseEntity.ok()
             .header("Content-Disposition", dispositionBuilder.filename(fileName).build().toString())
             .contentLength(attachment.getLength())
             .contentType(MediaType.parseMediaType(attachment.getContentType()))
-            .body(node.downloadAttachment(attachmentId == null ? "default" : attachmentId));        
+            .body(bytes);        
     }
 
     /**

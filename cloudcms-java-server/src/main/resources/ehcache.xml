@@ -31,29 +31,6 @@
         </resources>
     </cache-template>
 
-    <cache-template name="page">
-        <expiry>
-            <ttl unit="hours">4</ttl>
-        </expiry>
-
-        <listeners>
-            <listener>
-                <class>com.cloudcms.cache.CacheLogger</class>
-                <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
-                <event-ordering-mode>UNORDERED</event-ordering-mode>
-                <events-to-fire-on>CREATED</events-to-fire-on>
-                <events-to-fire-on>EXPIRED</events-to-fire-on>
-                <events-to-fire-on>EVICTED</events-to-fire-on>
-            </listener>
-        </listeners>
-
-        <resources>
-            <heap>1000</heap>
-            <offheap unit="MB">10</offheap>
-            <disk persistent="true" unit="MB">20</disk>
-        </resources>
-    </cache-template>
-
     <cache-template name="attachment">
         <expiry>
             <ttl unit="hours">4</ttl>

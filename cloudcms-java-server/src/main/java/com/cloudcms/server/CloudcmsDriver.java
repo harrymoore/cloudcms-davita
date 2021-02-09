@@ -266,10 +266,11 @@ public class CloudcmsDriver {
      * retrieve a node's attachment bytes
      * 
      * @param branchId
-     * @param locale
-     * @param id
-     * 
-     * @return Node
+     * @param nodeId
+     * @param attachmentId
+     * @param cacheResults
+     * @return
+     * @throws CmsDriverBranchNotFoundException
      */
     @Cacheable(value = "attachment-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#nodeId).concat(#attachmentId)")
     public byte[] getDocumentAttachmentBytesById(final String branchId, final String nodeId,
@@ -285,6 +286,7 @@ public class CloudcmsDriver {
      * @param nodeId
      * @param attachmentId
      * @param mimetype
+     * @param size
      * @param cacheResults
      * @return
      * @throws Exception

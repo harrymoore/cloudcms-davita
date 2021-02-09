@@ -54,13 +54,16 @@
         </div>
     </div>
 
+    <!-- <p>_<span th:text="${document.getId()}"></span>_</p>
+    <p th:text="${indexDocuments}"></p> -->
+
     <div class="container-fluid">
         <div class="row gx-1 gy-1">
             <div class="col-xl-3 col-md-4 col-sm-12 gx-1 gy-1 vh-25">
                 <div class="list-group" height=100px>
                     <a th:each="doc : ${indexDocuments}" th:href="@{/index/{documentId}(documentId=${doc.getId()})}"
                         class="list-group-item list-group-item-action m-1" aria-current="true"
-                        th:classappend="${doc.getId().equals(id) ? 'active' : ''}">
+                        th:classappend="${doc.getId().equals(document.getId()) ? 'active' : ''}">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1" th:text="${doc.title}"></h5>
                         </div>
@@ -120,7 +123,7 @@
                         <script th:inline="JavaScript">
                             var link = "[('/attachment/'+ ${attachment.id} + '?attachmentId=default')]";
                             PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
-                                height: "750px",
+                                height: "900px",
                                 forcePDFJS: true
                             });
                         </script>
@@ -139,7 +142,7 @@
                         <script th:inline="JavaScript">
                             var link = "[('/preview/'+ ${attachment.id} + '?attachmentId=default&mimetype=application/pdf&size=400')]";
                             PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
-                                height: "750px",
+                                height: "900px",
                                 forcePDFJS: true
                             });
                         </script>

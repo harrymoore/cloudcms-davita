@@ -40,7 +40,7 @@ public class DocumentViewerController {
 
     @GetMapping(value = { "/index", "index/{nodeId}" })
     public String getDocument(@PathVariable(required = false) final String nodeId,
-            @RequestParam(required = false) final String branch, 
+            @RequestParam(required = false) final String branchId, 
             @RequestParam(required = false) final String metadata,
             @RequestParam(required = false) final String rangeFilter,
             @RequestParam(required = false, defaultValue = "") final String tagFilter,
@@ -59,7 +59,7 @@ public class DocumentViewerController {
         final Boolean cache = Boolean.parseBoolean(useCache);
 
         // add the list of documents to the model so that an index can be built
-        List<Node> nodes = driver.queryNodesByType(driver.getBranch(branch).getId(), rangeFilter, tagFilter, NODE_TYPE, cache);
+        List<Node> nodes = driver.queryNodesByType(driver.getBranch(branchId).getId(), rangeFilter, tagFilter, NODE_TYPE, cache);
         map.addAttribute("indexDocuments", nodes);
 
         Boolean hasVideo = false;
@@ -69,13 +69,13 @@ public class DocumentViewerController {
 
         // add the requested document, if it exists, to the model
         if (null != nodeId && !nodeId.isEmpty()) {
-            Node node = driver.getNodeById(driver.getBranch(branch).getId(), nodeId, cache);
+            Node node = driver.getNodeById(driver.getBranch(branchId).getId(), nodeId, cache);
             map.addAttribute("document", node);
 
             // for each "document" relator item, gather info about the related node and it's "default" attachment
             List<Map<String,String>> relatedDocuments = (List<Map<String,String>>)node.get("document");
             for(Map<String,String> doc : relatedDocuments) {
-                Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branch).getId(), (String)doc.get("id"), "default", cache);
+                Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branchId).getId(), (String)doc.get("id"), "default", cache);
 
                 boolean isOther = true;
 
@@ -129,7 +129,7 @@ public class DocumentViewerController {
         pagination.setLimit(1000);
         pagination.getSorting().addSort("title", 1);
 
-        map.addAttribute("tags", driver.queryNodes(driver.getBranch(branch).getId(), query, pagination, cache));
+        map.addAttribute("tags", driver.queryNodes(driver.getBranch(branchId).getId(), query, pagination, cache));
 
         return VIEW_NAME;
     }
