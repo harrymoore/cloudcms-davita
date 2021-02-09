@@ -97,17 +97,17 @@
                     <div class="card-body md-4 p-0 m-0 gx-0 gy-0" th:inline="JavaScript" th:if="${attachment.isVideo}">
                         <!-- Video content -->
                         <video-js __width="100%" __style="overflow: hidden;" th:id="'video'+${attachmentIndex.index}"
-                            class="video-js" data-setup='{"controls": true, "autoplay": false, "preload": "none"}'>
-                            <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
+                            class="video-js" data-setup='{"controls": true, "autoplay": false, "preload": "auto"}'>
+                            <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentId=default'"
                                 th:attr="type=${attachment.mimetype}" />
                         </video-js>
                     </div>
 
                     <div class="card-body" th:if="${attachment.isAudio}">
                         <!-- Audio content -->
-                        <audio th:id="'audio'+${attachmentIndex.index}" class="video-js" controls preload="none"
+                        <audio th:id="'audio'+${attachmentIndex.index}" class="video-js" controls preload="auto"
                             width="100%">
-                            <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentName=default'"
+                            <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentId=default'"
                                 th:attr="type=${attachment.mimetype}" />
                         </audio>
                     </div>
@@ -118,7 +118,7 @@
                         </div>
 
                         <script th:inline="JavaScript">
-                            var link = "[('/attachment/'+ ${attachment.id} + '?attachmentName=default')]";
+                            var link = "[('/attachment/'+ ${attachment.id} + '?attachmentId=default')]";
                             PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
                                 height: "750px",
                                 forcePDFJS: true
@@ -128,7 +128,7 @@
 
                     <div class="card-body" th:if="${attachment.isImage}">
                         <!-- Image content -->
-                        <img class="img" th:attr="src='/attachment/'+ ${attachment.id} + '?attachmentName=default'">
+                        <img class="img" th:attr="src='/attachment/'+ ${attachment.id} + '?attachmentId=default'">
                     </div>
 
                     <div th:if="${attachment.isOther}">
@@ -137,7 +137,7 @@
                         </div>
 
                         <script th:inline="JavaScript">
-                            var link = "[('/preview/'+ ${attachment.id} + '?attachmentName=default&mimetype=application/pdf&size=400')]";
+                            var link = "[('/preview/'+ ${attachment.id} + '?attachmentId=default&mimetype=application/pdf&size=400')]";
                             PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
                                 height: "750px",
                                 forcePDFJS: true
