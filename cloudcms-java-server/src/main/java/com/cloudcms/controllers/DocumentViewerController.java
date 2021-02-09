@@ -6,8 +6,8 @@ package com.cloudcms.controllers;
 import java.util.List;
 import java.util.Map;
 
-import com.cloudcms.server.CloudCmsDriverBranchNotFoundException;
 import com.cloudcms.server.CloudcmsDriver;
+import com.cloudcms.server.CmsDriverBranchNotFoundException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.gitana.platform.client.attachment.Attachment;
@@ -38,15 +38,15 @@ public class DocumentViewerController {
         return "redirect:/index";
     }
 
-    @GetMapping(value = { "/index", "index/{id}" })
-    public String getDocument(@PathVariable(required = false) final String id,
+    @GetMapping(value = { "/index", "index/{nodeId}" })
+    public String getDocument(@PathVariable(required = false) final String nodeId,
             @RequestParam(required = false) final String branch, 
             @RequestParam(required = false) final String metadata,
             @RequestParam(required = false) final String rangeFilter,
             @RequestParam(required = false, defaultValue = "") final String tagFilter,
             @RequestParam(required = false, defaultValue = "true") final String useCache, 
             final Model map)
-            throws CloudCmsDriverBranchNotFoundException {
+            throws CmsDriverBranchNotFoundException {
 
         log.debug("getDocument()");
         
@@ -68,8 +68,8 @@ public class DocumentViewerController {
         Boolean hasImage = false;
 
         // add the requested document, if it exists, to the model
-        if (null != id && !id.isEmpty()) {
-            Node node = driver.getNodeById(driver.getBranch(branch).getId(), driver.getLocale(), id, cache);
+        if (null != nodeId && !nodeId.isEmpty()) {
+            Node node = driver.getNodeById(driver.getBranch(branch).getId(), nodeId, cache);
             map.addAttribute("document", node);
 
             // for each "document" relator item, gather info about the related node and it's "default" attachment

@@ -3,14 +3,15 @@
  */
 package com.cloudcms;
 
-import com.cloudcms.server.CloudCmsDriverBranchNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.cloudcms.controllers.AdminController;
 import com.cloudcms.server.CloudcmsDriver;
+import com.cloudcms.server.CmsDriverBranchNotFoundException;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 public class CloudcmsJavaServerApplicationTests {
@@ -37,8 +38,7 @@ public class CloudcmsJavaServerApplicationTests {
 	}
 
 	@Test
-	public void cloudCmsDriverFetchNode() throws CloudCmsDriverBranchNotFoundException {
-		assertThat(driver.getNodeById("master", "default", "root", CloudcmsDriver.IGNORE_CACHE)).isNotNull();
-		assertThat(driver.getNodeByPath("master", "default", "/", CloudcmsDriver.IGNORE_CACHE)).isNotNull();
+	public void cloudCmsDriverFetchNode() throws CmsDriverBranchNotFoundException {
+		assertThat(driver.getNodeById("master", "root", CloudcmsDriver.IGNORE_CACHE)).isNotNull();
 	}
 }
