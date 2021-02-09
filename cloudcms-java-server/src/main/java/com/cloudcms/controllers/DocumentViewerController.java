@@ -33,13 +33,13 @@ public class DocumentViewerController {
     private static final String VIEW_NAME = "index";
     private static final String NODE_TYPE = "davita:document";
 
-    @GetMapping(value = { "", "/", "index.html" })
-    public String redirectToRoot() {
-        return "redirect:/index";
-    }
+    // @GetMapping(value = { "", "/", "index.html" })
+    // public String redirectToRoot() {
+    //     return "redirect:/index";
+    // }
 
-    @GetMapping(value = { "/index", "index/{nodeId}" })
-    public String getDocument(@PathVariable(required = false) final String nodeId,
+    @GetMapping(value = { "", "/", "index.html", "/index", "index/{nodeId}" })
+    public String getDocument(@PathVariable(required = false) String nodeId,
             @RequestParam(required = false) final String branchId, 
             @RequestParam(required = false) final String metadata,
             @RequestParam(required = false) final String rangeFilter,
@@ -59,8 +59,12 @@ public class DocumentViewerController {
         final Boolean cache = Boolean.parseBoolean(useCache);
 
         // add the list of documents to the model so that an index can be built
-        List<Node> nodes = driver.queryNodesByType(driver.getBranch(branchId).getId(), rangeFilter, tagFilter, NODE_TYPE, cache);
-        map.addAttribute("indexDocuments", nodes);
+        List<Node> indexNodes = driver.queryNodesByType(driver.getBranch(branchId).getId(), rangeFilter, tagFilter, NODE_TYPE, cache);
+        map.addAttribute("indexDocuments", indexNodes);
+
+        if ((nodeId == null || nodeId.isEmpty()) && !indexNodes.isEmpty()) {
+            return String.format("redirect:/index/%s", indexNodes.get(0).getId());
+        }
 
         Boolean hasVideo = false;
         Boolean hasAudio = false;
@@ -118,7 +122,10 @@ public class DocumentViewerController {
         }
         else
         {
-            map.addAttribute("document", !nodes.isEmpty() ? nodes.get(0) : null);
+            map.addAttribute("hasVideo", false);
+            map.addAttribute("hasAudio", false);
+            map.addAttribute("hasPdf", false);
+            map.addAttribute("hasImage", false);
         }
 
         ObjectNode query = JsonUtil.createObject();
