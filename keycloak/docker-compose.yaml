@@ -11,6 +11,8 @@ services:
       # - POSTGRES_HOST_AUTH_METHOD=trust
       - POSTGRES_PASSWORD=keycloak
       - POSTGRES_USER=keycloak
+    volumes:
+      - ./postgres/database-data:/var/lib/postgresql/data/
 
   keycloak:
     build: ./keycloak
@@ -19,9 +21,9 @@ services:
     ports:
       - "9090:8080"
     volumes:
-      - ../keycloak:/opt/jboss/keycloak/imports
-    # command:
-    #   - "-b 0.0.0.0 -Dkeycloak.import=/opt/jboss/keycloak/imports/realm-export.json"
+      - ./keycloak/keycloak-data:/opt/jboss/keycloak/imports
+    command:
+      - "-b 0.0.0.0 -Dkeycloak.import=/opt/jboss/keycloak/imports/realm-export.json"
     environment:
       - KEYCLOAK_USER=keycloak
       - KEYCLOAK_PASSWORD=keycloak
