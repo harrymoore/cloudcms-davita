@@ -6,6 +6,9 @@ package com.cloudcms.controllers;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
 import com.cloudcms.server.CloudcmsDriver;
 import com.cloudcms.server.CmsDriverBranchNotFoundException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -17,6 +20,7 @@ import org.gitana.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,18 +31,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class DocumentViewerController {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
+    @Value("${app.ui-template}")
+    private String template;
+
     @Autowired
     private CloudcmsDriver driver;
 
-    private static final String VIEW_NAME = "index";
     private static final String NODE_TYPE = "davita:document";
 
-    // @GetMapping(value = { "", "/", "index.html" })
-    // public String redirectToRoot() {
-    //     return "redirect:/index";
-    // }
+    @GetMapping(value = { "/" })
+    public String redirectToRoot() {
+        return "redirect:/documents";
+    }
 
-    @GetMapping(value = { "", "/", "index.html", "/index", "index/{nodeId}" })
+    @GetMapping(value = { "/logout" })
+    public String logout(HttpServletRequest request) throws ServletException {
+        request.logout();
+        return "redirect:/documents";
+    }
+
+    @GetMapping(value = { "/documents", "/documents/{nodeId}" })
     public String getDocument(@PathVariable(required = false) String nodeId,
             @RequestParam(required = false) final String branchId, 
             @RequestParam(required = false) final String metadata,
@@ -62,9 +74,9 @@ public class DocumentViewerController {
         List<Node> indexNodes = driver.queryNodesByType(driver.getBranch(branchId).getId(), rangeFilter, tagFilter, NODE_TYPE, cache);
         map.addAttribute("indexDocuments", indexNodes);
 
-        if ((nodeId == null || nodeId.isEmpty()) && !indexNodes.isEmpty()) {
-            return String.format("redirect:/index/%s", indexNodes.get(0).getId());
-        }
+        // if ((nodeId == null || nodeId.isEmpty()) && !indexNodes.isEmpty()) {
+        //     return String.format("redirect:/documents/%s", indexNodes.get(0).getId());
+        // }
 
         Boolean hasVideo = false;
         Boolean hasAudio = false;
@@ -77,6 +89,7 @@ public class DocumentViewerController {
             map.addAttribute("document", node);
 
             // for each "document" relator item, gather info about the related node and it's "default" attachment
+            @SuppressWarnings("unchecked")
             List<Map<String,String>> relatedDocuments = (List<Map<String,String>>)node.get("document");
             for(Map<String,String> doc : relatedDocuments) {
                 Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branchId).getId(), (String)doc.get("id"), "default", cache);
@@ -138,6 +151,6 @@ public class DocumentViewerController {
 
         map.addAttribute("tags", driver.queryNodes(driver.getBranch(branchId).getId(), query, pagination, cache));
 
-        return VIEW_NAME;
+        return template;
     }
 }

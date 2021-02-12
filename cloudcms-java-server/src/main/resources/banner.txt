@@ -5,5 +5,5 @@ ${Ansi.YELLOW}     D    D    A   A      V   V       I        T       A   A
 ${Ansi.YELLOW}     D   D    AAAAAAA      V V        I        T      AAAAAAA
 ${Ansi.YELLOW}     DDDD    A       A      V      IIIIIII     T     A       A
 
-${Ansi.WHITE}  :: Cloud CMS content server application ${application.version} based on Spring Boot${spring-boot.formatted-version} :: ${Ansi.DEFAULT}
+${Ansi.WHITE} :: ${spring.application.name} ${application.version} based on Java ${java.version} and Spring Boot${spring-boot.formatted-version} :: ${Ansi.DEFAULT}
 
