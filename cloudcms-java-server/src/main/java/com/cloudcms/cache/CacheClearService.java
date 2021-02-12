@@ -3,9 +3,6 @@
  */
 package com.cloudcms.cache;
 
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +18,6 @@ import org.springframework.stereotype.Service;
 @CacheConfig
 public class CacheClearService {
     private final Logger log = LoggerFactory.getLogger(CacheClearService.class);
-    // private final ConcurrentHashMap<String, List<String>> invalideNodes = new ConcurrentHashMap<>();
 
     @Autowired
     CacheManager cacheManager;

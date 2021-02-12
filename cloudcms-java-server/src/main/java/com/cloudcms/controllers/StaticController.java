@@ -8,8 +8,8 @@ import com.cloudcms.server.CloudcmsDriver;
 
 import org.gitana.platform.client.attachment.Attachment;
 import org.gitana.platform.client.node.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.ContentDisposition.Builder;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class StaticController {
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    // private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private CloudcmsDriver driver;

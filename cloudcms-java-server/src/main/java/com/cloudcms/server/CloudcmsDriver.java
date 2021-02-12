@@ -201,7 +201,7 @@ public class CloudcmsDriver {
 
         if (rangeFilter != null) {
             long ms = (System.currentTimeMillis() * 1000) - (Integer.parseInt(rangeFilter) * 86400000l);
-            query.put("_system.modified_on.ms", JsonUtil.createObject().put("$gt", ms));
+            query.set("_system.modified_on.ms", JsonUtil.createObject().put("$gt", ms));
         }
 
         if (!tagFilter.isEmpty()) {
