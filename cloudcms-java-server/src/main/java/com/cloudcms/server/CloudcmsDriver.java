@@ -185,8 +185,8 @@ public class CloudcmsDriver {
      * @return
      * @throws CmsDriverBranchNotFoundException
      */
-    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#rangeFilter==null?'':#rangeFilter).concat(#tagFilter==null?'':#tagFilter).concat(#type)")
-    public List<Node> queryNodesByType(final String branchId, final String rangeFilter, final String tagFilter,
+    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#roleFilter==null?'':#roleFilter.toString()).concat(#rangeFilter==null?'':#rangeFilter).concat(#tagFilter==null?'':#tagFilter).concat(#type)")
+    public List<Node> queryNodesByType(final String branchId, final List<String> roleFilter, final String rangeFilter, final String tagFilter,
             final String type, final Boolean cacheResults) throws CmsDriverBranchNotFoundException {
         log.debug(String.format("query nodes by type %s", type));
 
@@ -197,7 +197,11 @@ public class CloudcmsDriver {
 
         ObjectNode query = JsonUtil.createObject();
         query.put("_type", type);
-        query.set("_features.f:translation", JsonUtil.createObject().put("$exists", Boolean.FALSE));
+        // query.set("_features.f:translation", JsonUtil.createObject().put("$exists", Boolean.FALSE));
+
+        if (!roleFilter.isEmpty()) {
+            query.set("entitlements.title", JsonUtil.createObject().set("$in", JsonUtil.createArray(roleFilter)));
+        }
 
         if (rangeFilter != null) {
             long ms = (System.currentTimeMillis() * 1000) - (Integer.parseInt(rangeFilter) * 86400000l);

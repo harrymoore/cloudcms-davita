@@ -3,11 +3,14 @@
  */
 package com.cloudcms.controllers;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.cloudcms.server.CloudcmsDriver;
 import com.cloudcms.server.CmsDriverBranchNotFoundException;
@@ -17,6 +20,8 @@ import org.gitana.platform.client.attachment.Attachment;
 import org.gitana.platform.client.node.Node;
 import org.gitana.platform.support.Pagination;
 import org.gitana.util.JsonUtil;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.representations.AccessToken.Access;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +38,9 @@ public class DocumentViewerController {
 
     @Value("${app.ui-template}")
     private String template;
+
+    @Value("${keycloak.resource}")
+    private String keycloakResource;
 
     @Autowired
     private CloudcmsDriver driver;
@@ -51,17 +59,34 @@ public class DocumentViewerController {
     }
 
     @GetMapping(value = { "/documents", "/documents/{nodeId}" })
-    public String getDocument(@PathVariable(required = false) String nodeId,
-            @RequestParam(required = false) final String branchId, 
+    public String getDocument(final HttpServletRequest request, final HttpServletResponse response,
+            @PathVariable(required = false) String nodeId, @RequestParam(required = false) final String branchId,
             @RequestParam(required = false) final String metadata,
             @RequestParam(required = false) final String rangeFilter,
             @RequestParam(required = false, defaultValue = "") final String tagFilter,
-            @RequestParam(required = false, defaultValue = "true") final String useCache, 
-            final Model map)
-            throws CmsDriverBranchNotFoundException {
+            @RequestParam(required = false, defaultValue = "true") final String useCache, final Model map)
+            throws CmsDriverBranchNotFoundException, ForbiddenException {
 
-        log.debug("getDocument()");
-        
+        log.debug("getDocument {}", request.getRequestURI());
+
+        List<String> userRoles = Collections.emptyList();
+
+        if (request.getSession(false) == null) {
+            log.debug("No session");
+        } else {
+            // ((SecurityContextHolder)
+            // request.getUserPrincipal()).getContext().getAuthentication().getDetails();
+            KeycloakPrincipal<?> principal = (KeycloakPrincipal<?>) request.getUserPrincipal();
+            Access resourceAccess = principal.getKeycloakSecurityContext().getToken()
+                    .getResourceAccess(keycloakResource);
+
+            if (resourceAccess.getRoles() != null && !resourceAccess.getRoles().isEmpty()) {
+                userRoles = new ArrayList<String>(resourceAccess.getRoles());
+            }
+
+            log.debug("Session user {} with roles {}", principal.getName(), userRoles);
+        }
+
         // retrieve only metadata. not a binary attachment
         // Boolean includeMetadata = Boolean.parseBoolean(metadata);
 
@@ -71,21 +96,39 @@ public class DocumentViewerController {
         final Boolean cache = Boolean.parseBoolean(useCache);
 
         // add the list of documents to the model so that an index can be built
-        List<Node> indexNodes = driver.queryNodesByType(driver.getBranch(branchId).getId(), rangeFilter, tagFilter, NODE_TYPE, cache);
+        List<Node> indexNodes = driver.queryNodesByType(driver.getBranch(branchId).getId(), userRoles, rangeFilter,
+                tagFilter, NODE_TYPE, cache);
         map.addAttribute("indexDocuments", indexNodes);
 
         // if ((nodeId == null || nodeId.isEmpty()) && !indexNodes.isEmpty()) {
-        //     return String.format("redirect:/documents/%s", indexNodes.get(0).getId());
+        // return String.format("redirect:/documents/%s", indexNodes.get(0).getId());
         // }
 
         Boolean hasVideo = false;
         Boolean hasAudio = false;
         Boolean hasPdf = false;
         Boolean hasImage = false;
+        Boolean entitled = false;
 
         // add the requested document, if it exists, to the model
         if (null != nodeId && !nodeId.isEmpty()) {
             Node node = driver.getNodeById(driver.getBranch(branchId).getId(), nodeId, cache);
+
+            // check that role assignments allow access to this document
+            if (node.get("entitlements") != null) {
+                for (Map<String,String> entitlement : (List<Map<String,String>>)node.get("entitlements")) {
+                    // log.debug("role {}", entitlement.get("title"));
+                    if (userRoles.contains(entitlement.get("title"))) {
+                        entitled = true;
+                        continue;
+                    }
+                }
+            }
+
+            if (!entitled) {
+                throw new ForbiddenException("Not entitles to this document");
+            }
+
             map.addAttribute("document", node);
 
             // for each "document" relator item, gather info about the related node and it's "default" attachment

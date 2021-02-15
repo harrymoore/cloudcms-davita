@@ -8,13 +8,12 @@
 	"properties": {
 		"title": {
 			"type": "string",
-			"title": "title",
+			"title": "SSO Role Name",
 			"required": true
 		},
-		"id": {
+		"description": {
 			"type": "string",
-			"title": "ID",
-			"required": true
+			"title": "Description"
 		},
 		"email": {
 			"type": "string",

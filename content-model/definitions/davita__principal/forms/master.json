@@ -4,20 +4,18 @@
 	"fields": {
 		"title": {
 			"type": "text",
-			"label": "Title",
+			"label": "SSO Role Name",
 			"required": true,
 			"default": ""
 		},
-		"id": {
+		"description": {
 			"type": "text",
-			"label": "Id",
-			"required": true,
+			"label": "Description of Role",
 			"default": ""
 		},
 		"email": {
 			"type": "text",
 			"label": "Email Address",
-			"required": true,
 			"default": ""
 		}
 	},
