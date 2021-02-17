@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,7 +16,10 @@ import com.cloudcms.server.CmsDriverBranchNotFoundException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.gitana.platform.client.attachment.Attachment;
+import org.gitana.platform.client.node.Association;
 import org.gitana.platform.client.node.Node;
+import org.gitana.platform.client.node.type.LinkedAssociation;
+import org.gitana.platform.services.association.Direction;
 import org.gitana.platform.support.Pagination;
 import org.gitana.util.JsonUtil;
 import org.keycloak.KeycloakPrincipal;
@@ -39,29 +41,30 @@ public class DocumentViewerController {
     @Value("${app.ui-template}")
     private String template;
 
+    @Value("${app.ui-tags:false}")
+    private boolean useTags;
+
     @Value("${keycloak.resource}")
     private String keycloakResource;
 
     @Autowired
     private CloudcmsDriver driver;
 
-    private static final String NODE_TYPE = "davita:document";
-
     @GetMapping(value = { "/" })
     public String redirectToRoot() {
         return "redirect:/documents";
     }
 
-    @GetMapping(value = { "/logout" })
-    public String logout(HttpServletRequest request) throws ServletException {
-        request.logout();
-        return "redirect:/documents";
-    }
+    // @GetMapping(value = { "/logout" })
+    // public String logout(HttpServletRequest request) throws ServletException {
+    // request.logout();
+    // return "redirect:/documents";
+    // }
 
     @GetMapping(value = { "/documents", "/documents/{nodeId}" })
     public String getDocument(final HttpServletRequest request, final HttpServletResponse response,
             @PathVariable(required = false) String nodeId, @RequestParam(required = false) final String branchId,
-            @RequestParam(required = false) final String metadata,
+            @RequestParam(required = false, defaultValue = "") final String searchText,
             @RequestParam(required = false) final String rangeFilter,
             @RequestParam(required = false, defaultValue = "") final String tagFilter,
             @RequestParam(required = false, defaultValue = "true") final String useCache, final Model map)
@@ -74,8 +77,6 @@ public class DocumentViewerController {
         if (request.getSession(false) == null) {
             log.debug("No session");
         } else {
-            // ((SecurityContextHolder)
-            // request.getUserPrincipal()).getContext().getAuthentication().getDetails();
             KeycloakPrincipal<?> principal = (KeycloakPrincipal<?>) request.getUserPrincipal();
             Access resourceAccess = principal.getKeycloakSecurityContext().getToken()
                     .getResourceAccess(keycloakResource);
@@ -87,22 +88,54 @@ public class DocumentViewerController {
             log.debug("Session user {} with roles {}", principal.getName(), userRoles);
         }
 
-        // retrieve only metadata. not a binary attachment
-        // Boolean includeMetadata = Boolean.parseBoolean(metadata);
-
+        map.addAttribute("searchText", searchText == null ? "" : searchText);
         map.addAttribute("rangeFilter", rangeFilter == null ? "" : rangeFilter);
         map.addAttribute("tagFilter", tagFilter == null ? "" : tagFilter);
 
         final Boolean cache = Boolean.parseBoolean(useCache);
 
-        // add the list of documents to the model so that an index can be built
-        List<Node> indexNodes = driver.queryNodesByType(driver.getBranch(branchId).getId(), userRoles, rangeFilter,
-                tagFilter, NODE_TYPE, cache);
-        map.addAttribute("indexDocuments", indexNodes);
+        List<Node> indexNodes = new ArrayList<Node>();
 
-        // if ((nodeId == null || nodeId.isEmpty()) && !indexNodes.isEmpty()) {
-        // return String.format("redirect:/documents/%s", indexNodes.get(0).getId());
-        // }
+        /*
+         * if there is a search string provided then first search for documents with the
+         * search value and then find any davita:document instances that reference them
+         * and further check those for other filters
+         */
+        if (searchText != null && !searchText.isBlank()) {
+            final List<String> indexNodesList = new ArrayList<String>();
+            final List<Node> searchResultNodes = driver.searchNodes(driver.getBranch(branchId).getId(), searchText, cache);
+            for (Node node : searchResultNodes) {
+                if (node.getTypeQName().equals(CloudcmsDriver.NODE_TYPE_QNAME)) {
+                    // this is a document so include it in the index
+                    indexNodesList.add(node.getId());
+                } else {
+                    // this is a different document type. see if it has an association to a
+                    // davita:document
+                    for (Association association : node.associations(LinkedAssociation.QNAME, Direction.ANY).asList()) {
+                        // log.debug("{}", association.toString());
+                        if (association.getSourceNodeTypeQName().equals(CloudcmsDriver.NODE_TYPE_QNAME)) {
+                            // this document is related to a davita document
+                            indexNodesList.add(association.getSourceNodeId());
+                        }
+                    }
+                }
+            }
+
+            // add the list of documents to the model so that an index can be built
+            if (!indexNodesList.isEmpty()) {
+                indexNodes = driver.queryNodesByType(driver.getBranch(branchId).getId(), indexNodesList,
+                        userRoles, rangeFilter, tagFilter, CloudcmsDriver.NODE_TYPE, cache);
+
+            }
+
+            map.addAttribute("indexDocuments", indexNodes);
+        } else {
+            // add the list of documents to the model so that an index can be built
+            indexNodes = driver.queryNodesByType(driver.getBranch(branchId).getId(),
+                    Collections.<String>emptyList(), userRoles, rangeFilter, tagFilter, CloudcmsDriver.NODE_TYPE,
+                    cache);
+            map.addAttribute("indexDocuments", indexNodes);
+        }
 
         Boolean hasVideo = false;
         Boolean hasAudio = false;
@@ -116,7 +149,7 @@ public class DocumentViewerController {
 
             // check that role assignments allow access to this document
             if (node.get("entitlements") != null) {
-                for (Map<String,String> entitlement : (List<Map<String,String>>)node.get("entitlements")) {
+                for (Map<String, String> entitlement : (List<Map<String, String>>) node.get("entitlements")) {
                     // log.debug("role {}", entitlement.get("title"));
                     if (userRoles.contains(entitlement.get("title"))) {
                         entitled = true;
@@ -130,21 +163,25 @@ public class DocumentViewerController {
             }
 
             map.addAttribute("document", node);
+            map.addAttribute("documentId", node.getId());
 
-            // for each "document" relator item, gather info about the related node and it's "default" attachment
+            // for each "document" relator item, gather info about the related node and it's
+            // "default" attachment
             @SuppressWarnings("unchecked")
-            List<Map<String,String>> relatedDocuments = (List<Map<String,String>>)node.get("document");
-            for(Map<String,String> doc : relatedDocuments) {
-                Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branchId).getId(), (String)doc.get("id"), "default", cache);
+            List<Map<String, String>> relatedDocuments = (List<Map<String, String>>) node.get("document");
+            for (Map<String, String> doc : relatedDocuments) {
+                Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branchId).getId(),
+                        (String) doc.get("id"), "default", cache);
 
                 boolean isOther = true;
 
                 doc.put("id", doc.get("id"));
                 doc.put("attachmentId", attachment.getId());
                 doc.put("mimetype", attachment.getContentType());
-                doc.put("isVideo", String.valueOf(attachment.getContentType().startsWith("video/") 
-                    || attachment.getContentType().endsWith("/ogg") 
-                    || attachment.getContentType().endsWith("/ogv")));
+                doc.put("isVideo",
+                        String.valueOf(attachment.getContentType().startsWith("video/")
+                                || attachment.getContentType().endsWith("/ogg")
+                                || attachment.getContentType().endsWith("/ogv")));
                 doc.put("isAudio", String.valueOf(attachment.getContentType().startsWith("audio/")));
                 doc.put("isPdf", String.valueOf(attachment.getContentType().endsWith("/pdf")));
                 doc.put("isImage", String.valueOf(attachment.getContentType().startsWith("image/")));
@@ -164,35 +201,36 @@ public class DocumentViewerController {
                 if (Boolean.parseBoolean(doc.get("isImage"))) {
                     hasImage = true;
                     isOther = false;
-                }                
+                }
 
                 doc.put("isOther", String.valueOf(isOther));
             }
 
             map.addAttribute("attachments", relatedDocuments);
-            
+
             map.addAttribute("hasVideo", hasVideo);
             map.addAttribute("hasAudio", hasAudio);
             map.addAttribute("hasPdf", hasPdf);
             map.addAttribute("hasImage", hasImage);
-        }
-        else
-        {
+        } else {
             map.addAttribute("hasVideo", false);
             map.addAttribute("hasAudio", false);
             map.addAttribute("hasPdf", false);
             map.addAttribute("hasImage", false);
         }
 
-        ObjectNode query = JsonUtil.createObject();
-        query.put("_type", "n:tag");
-        query.set("_fields", JsonUtil.createObject().put("title", 1).put("tag", 1).put("_type", 1).put("_qname", 1));
+        if (useTags) {
+            ObjectNode query = JsonUtil.createObject();
+            query.put("_type", "n:tag");
+            query.set("_fields",
+                    JsonUtil.createObject().put("title", 1).put("tag", 1).put("_type", 1).put("_qname", 1));
 
-        Pagination pagination = new Pagination();
-        pagination.setLimit(1000);
-        pagination.getSorting().addSort("title", 1);
+            Pagination pagination = new Pagination();
+            pagination.setLimit(1000);
+            pagination.getSorting().addSort("title", 1);
 
-        map.addAttribute("tags", driver.queryNodes(driver.getBranch(branchId).getId(), query, pagination, cache));
+            map.addAttribute("tags", driver.queryNodes(driver.getBranch(branchId).getId(), query, pagination, cache));
+        }
 
         return template;
     }

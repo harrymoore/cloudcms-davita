@@ -26,6 +26,7 @@ import org.gitana.platform.client.support.DriverContext;
 import org.gitana.platform.client.support.RemoteImpl;
 import org.gitana.platform.services.branch.BranchType;
 import org.gitana.platform.support.Pagination;
+import org.gitana.platform.support.QName;
 import org.gitana.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,8 @@ public class CloudcmsDriver {
 
     public static final Boolean USE_CACHE = Boolean.TRUE;
     public static final Boolean IGNORE_CACHE = Boolean.FALSE;
+    public static final String NODE_TYPE = "davita:document";
+    public static final QName NODE_TYPE_QNAME = QName.create(NODE_TYPE);
 
     @Value("${gitana.clientKey}")
     private String clientKey;
@@ -161,16 +164,15 @@ public class CloudcmsDriver {
      * retrieve a node by its id (_doc)
      * 
      * @param branchId
-     * @param locale
      * @param nodeId
      * @param cacheResults
-     * @return Node
+     * @return
      * @throws CmsDriverBranchNotFoundException
      */
     @Cacheable(value = "node-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#nodeId)")
     public Node getNodeById(final String branchId, final String nodeId, final Boolean cacheResults)
             throws CmsDriverBranchNotFoundException {
-        log.debug(String.format("get node with id %s and locale %s from branch %s", nodeId, locale, branchId));
+        log.debug(String.format("get node with id %s from branch %s", nodeId, branchId));
 
         return (Node) getBranch(branchId).readNode(nodeId);
     }
@@ -179,25 +181,32 @@ public class CloudcmsDriver {
      * query for nodes by type qname (ex.: "n:node")
      * 
      * @param branchId
-     * @param locale
+     * @param idList
+     * @param roleFilter
+     * @param rangeFilter
+     * @param tagFilter
      * @param type
      * @param cacheResults
      * @return
      * @throws CmsDriverBranchNotFoundException
      */
-    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#roleFilter==null?'':#roleFilter.toString()).concat(#rangeFilter==null?'':#rangeFilter).concat(#tagFilter==null?'':#tagFilter).concat(#type)")
-    public List<Node> queryNodesByType(final String branchId, final List<String> roleFilter, final String rangeFilter, final String tagFilter,
-            final String type, final Boolean cacheResults) throws CmsDriverBranchNotFoundException {
+    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#idList.toString()).concat(#roleFilter==null?'':#roleFilter.toString()).concat(#rangeFilter==null?'':#rangeFilter).concat(#tagFilter==null?'':#tagFilter).concat(#type)")
+    public List<Node> queryNodesByType(final String branchId, final List<String> idList, final List<String> roleFilter,
+            final String rangeFilter, final String tagFilter, final String type, final Boolean cacheResults)
+            throws CmsDriverBranchNotFoundException {
         log.debug(String.format("query nodes by type %s", type));
 
         Pagination pagination = new Pagination();
         pagination.setSkip(0);
-        pagination.setLimit(100);
+        pagination.setLimit(-1);
         pagination.getSorting().addSort("_system.modified_on.ms", -1);
 
         ObjectNode query = JsonUtil.createObject();
         query.put("_type", type);
-        // query.set("_features.f:translation", JsonUtil.createObject().put("$exists", Boolean.FALSE));
+
+        if (!idList.isEmpty()) {
+            query.set("_doc", JsonUtil.createObject().set("$in", JsonUtil.createArray(idList)));
+        }
 
         if (!roleFilter.isEmpty()) {
             query.set("entitlements.title", JsonUtil.createObject().set("$in", JsonUtil.createArray(roleFilter)));
@@ -208,20 +217,67 @@ public class CloudcmsDriver {
             query.set("_system.modified_on.ms", JsonUtil.createObject().put("$gt", ms));
         }
 
+        query.set("_fields", JsonUtil.createObject().put("title", 1).put("_type", 1).put("_qname", 1).put("_system.modified_on.iso_8601", 1));
+
         if (!tagFilter.isEmpty()) {
             query.put("tags", tagFilter);
+            ((ObjectNode) query.get("_fields")).put("tags", 1);
         }
-
-        query.set("_fields", JsonUtil.createObject()
-            .put("title", 1)
-            .put("description", 1)
-            .put("tags", 1)
-            .put("_type", 1)
-            .put("_qname", 1)
-            .put("_system.modified_on.iso_8601", 1));
 
         List<Node> list = new ArrayList<>(1000);
         getBranch(branchId).queryNodes(query, pagination).forEach((k, n) -> list.add((Node) n));
+
+        return list;
+    }
+
+    /**
+     * search for nodes on a branch
+     * 
+     * @param branchId
+     * @param text
+     * @param cacheResults
+     * @return
+     * @throws CmsDriverBranchNotFoundException
+     */
+    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#text == null ? '' : #text)")
+    public List<Node> searchNodes(final String branchId, final String text, final Boolean cacheResults)
+            throws CmsDriverBranchNotFoundException {
+        log.debug("search nodes by for string {}", text);
+
+        ObjectNode search = JsonUtil.createObject();
+        search.set("search", JsonUtil.createObject().set("query", JsonUtil.createObject().set("query_string", JsonUtil.createObject().put("query", text))));
+        search.set("_fields", JsonUtil.createObject().put("title", 1).put("_type", 1).put("_qname", 1));
+
+        List<Node> list = new ArrayList<>();
+        getBranch(branchId).searchNodes(search).forEach((k, n) -> list.add((Node) n));
+
+        return list;
+    }
+    
+    private static final String[] types = {NODE_TYPE};
+    private static final ObjectNode traverse = JsonUtil.createObject();
+    static {
+        traverse.set("associations", JsonUtil.createObject().put("a:linked", "INCOMING"));
+        traverse.put("depth", 1);
+        traverse.set("types", JsonUtil.createArray(types));
+    }
+
+    /**
+     * find nodes on a branch. uses the node "find" API call rather than the branch "find" so the tranverse option can be used
+     * 
+     * @param branchId
+     * @param text
+     * @param cacheResults
+     * @return
+     * @throws CmsDriverBranchNotFoundException
+     */
+    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#text == null ? '' : #text)")
+    public List<Node> findNodes(final String branchId, final String text, final Boolean cacheResults)
+            throws CmsDriverBranchNotFoundException {
+        log.debug("find nodes with string {}", text);
+
+        List<Node> list = new ArrayList<>();
+        getBranch(branchId).rootNode().findNodes(null, text, traverse).forEach((k, n) -> list.add((Node) n));
 
         return list;
     }
@@ -250,13 +306,12 @@ public class CloudcmsDriver {
 
     /**
      * retrieve a node's attachment object
-     *
+     * 
      * @param branchId
-     * @param locale
-     * @param id         id of the node
-     * @param attachment id of the attachment
-     *
-     * @return org.gitana.platform.client.attachment.Attachment
+     * @param nodeId
+     * @param attachmentId
+     * @param cacheResults
+     * @return
      * @throws CmsDriverBranchNotFoundException
      */
     @Cacheable(value = "attachment-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#nodeId).concat(#attachmentId)")
@@ -277,8 +332,8 @@ public class CloudcmsDriver {
      * @throws CmsDriverBranchNotFoundException
      */
     @Cacheable(value = "attachment-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#nodeId).concat(#attachmentId)")
-    public byte[] getDocumentAttachmentBytesById(final String branchId, final String nodeId,
-            final String attachmentId, final Boolean cacheResults) throws CmsDriverBranchNotFoundException {
+    public byte[] getDocumentAttachmentBytesById(final String branchId, final String nodeId, final String attachmentId,
+            final Boolean cacheResults) throws CmsDriverBranchNotFoundException {
 
         return getBranch(branchId).readNode(nodeId).downloadAttachment(attachmentId);
     }

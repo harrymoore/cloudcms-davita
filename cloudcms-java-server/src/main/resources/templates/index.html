@@ -32,41 +32,28 @@
 </head>
 
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col text-center">
-                <button type="submit" class="btn btn-primary m-1 p-0 pl-1"
-                    th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">
-                    <a th:href="@{/index?rangeFilter=1}"></a>Day</button>
-
-                <button type="button" th:href="@{/index?rangeFilter=7}" class="btn btn-primary filter m-1 p-0 pl-1"
-                    th:classappend="${rangeFilter.equals('7') ? 'active' : ''}" aria-current="page">Week</button>
-                <button type="button" th:href="@{/index?rangeFilter=30}" class="btn btn-primary filter m-1 p-0 pl-1"
-                    th:classappend="${rangeFilter.equals('30') ? 'active' : ''}" aria-current="page">Month</button>
-            </div>
-
-            <div class="col-12 text-center">
-                <button th:each="tag : ${tags}" th:href="@{/index(tagFilter=${tag.get('tag')})}"
-                    th:text="${tag.get('title')}" class="btn btn-primary m-1 mt-0 mb-0 p-1"
-                    th:classappend="${tagFilter}" aria-current="page">
-                </button>
+    <nav class="navbar navbar-light bg-light col-sm-12">
+        <div class="container-fluid">
+            <div class="justify-content-start" id="navbarSupportedContent">
+                <form class="d-flex" method="GET" th:action="@{/documents}">
+                    <input class="form-control me-2" name="searchText" id="searchText" th:value="${searchText}" placeholder="Search.." aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit" value="search">Search</button>
+                </form>
             </div>
         </div>
-    </div>
+    </nav>
 
     <!-- <p>_<span th:text="${document.getId()}"></span>_</p> -->
     <!-- <p th:text="${indexDocuments}"></p> -->
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xl-3 col-md-4 col-sm-12">
+            <div class="col-xl-3 col-md-4 col-sm-12 mt-1">
                 <div class="list-group">
-                    <a th:each="doc : ${indexDocuments}" 
-                        th:href="@{/index/{documentId}(documentId=${doc.getId()})}"
-                        th:text="${doc.title}"
-                        class="list-group-item list-group-item-action" aria-current="true"
-                        th:classappend="${doc.getId().equals(document == null ? '' : document.getId()) ? 'active' : ''}">
-                        
+                    <a th:each="doc : ${indexDocuments}" th:href="@{/documents/{documentId}(documentId=${doc.getId()})}"
+                        th:text="${doc.title}" class="list-group-item list-group-item-action" aria-current="true"
+                        th:classappend="${doc.getId().equals(document == null ? '' : documentId) ? 'active' : ''}">
+
                         <!-- <div class="d-flex justify-content-between">
                             <h5 class="" th:text="${doc.title}"></h5>
                         </div>
@@ -89,7 +76,8 @@
                     </div>
                 </div>
 
-                <div class="card p-0 m-1" th:if="${document.get('metadata') != null && document.get('metadata').size()>0}">
+                <div class="card p-0 m-1"
+                    th:if="${document.get('metadata') != null && document.get('metadata').size()>0}">
                     <div class="card-body">
                         <table class="table-sm table-borderless">
                             <tbody>
@@ -109,8 +97,9 @@
 
                     <div class="card-body" th:inline="JavaScript" th:if="${attachment.isVideo}">
                         <!-- Video content -->
-                        <video-js ____width="100%" height="auto"  __style="overflow: hidden;" th:id="'video'+${attachmentIndex.index}"
-                            class="video-js vjs-default-skin" data-setup='{"controls": true, "fluid": true, "autoplay": false, "preload": "auto"}'>
+                        <video-js ____width="100%" height="auto" __style="overflow: hidden;"
+                            th:id="'video'+${attachmentIndex.index}" class="video-js vjs-default-skin"
+                            data-setup='{"controls": true, "fluid": true, "autoplay": false, "preload": "auto"}'>
                             <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentId=default'"
                                 th:attr="type=${attachment.mimetype}" />
                         </video-js>
@@ -150,7 +139,7 @@
                         </div>
 
                         <script th:inline="JavaScript">
-                            var link = "[('/preview/'+ ${attachment.id} + '?attachmentId=default&mimetype=application/pdf&size=400')]";
+                            var link = "[('/preview/'+ ${attachment.id} + '?attachmentId=default&mimetype=application/pdf&size=500')]";
                             PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
                                 height: "900px",
                                 forcePDFJS: true
