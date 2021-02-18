@@ -41,26 +41,24 @@ public class StaticController {
      */
     @GetMapping(value = "/attachment/{nodeId}")
     public @ResponseBody ResponseEntity<byte[]> staticById(@PathVariable final String nodeId,
-            @RequestParam(required = false) final String branchId, 
+            @RequestParam(required = false) final String branchId,
             @RequestParam(required = false) final String attachmentId,
             @RequestParam(required = false) final String name,
             @RequestParam(required = false, defaultValue = "inline") final String disposition,
-            @RequestAttribute(required = false) final Boolean metadata) 
-                throws CmsDriverBranchNotFoundException {
-        
+            @RequestAttribute(required = false) final Boolean metadata) throws CmsDriverBranchNotFoundException {
+
         final Node node = driver.getNodeById(driver.getBranch(branchId).getId(), nodeId, CloudcmsDriver.USE_CACHE);
-        final Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branchId).getId(), nodeId, attachmentId == null ? "default" : attachmentId, CloudcmsDriver.USE_CACHE);
-
-        final Builder dispositionBuilder = disposition.equalsIgnoreCase("inline") ? ContentDisposition.inline() : ContentDisposition.attachment();
-        final String fileName = (name != null ? name : node.getTitle());
-
-        final byte[] bytes = driver.getDocumentAttachmentBytesById(driver.getBranch(branchId).getId(), nodeId, attachmentId == null ? "default" : attachmentId, CloudcmsDriver.USE_CACHE);
+        final Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branchId).getId(), nodeId,
+                attachmentId == null ? "default" : attachmentId, CloudcmsDriver.USE_CACHE);
+        final byte[] bytes = driver.getDocumentAttachmentBytesById(driver.getBranch(branchId).getId(), nodeId,
+                attachmentId == null ? "default" : attachmentId, CloudcmsDriver.USE_CACHE);
 
         return ResponseEntity.ok()
-            .header("Content-Disposition", dispositionBuilder.filename(fileName).build().toString())
-            .contentLength(attachment.getLength())
-            .contentType(MediaType.parseMediaType(attachment.getContentType()))
-            .body(bytes);        
+                .header("Content-Disposition",
+                        ContentDisposition.builder(disposition.equalsIgnoreCase("inline") ? "inline" : "attachment")
+                                .filename(name != null ? name : node.getTitle()).build().toString())
+                .contentLength(attachment.getLength())
+                .contentType(MediaType.parseMediaType(attachment.getContentType())).body(bytes);
     }
 
     /**
@@ -79,21 +77,19 @@ public class StaticController {
     public @ResponseBody ResponseEntity<byte[]> previewById(@PathVariable final String nodeId,
             @RequestParam(required = false) final String branchId,
             @RequestParam(required = true) final String attachmentId,
-            @RequestParam(required = false, defaultValue = "") final String name,
+            @RequestParam(required = false) final String name,
             @RequestParam(required = true) final String mimetype, @RequestParam(required = true) final String size,
             @RequestParam(required = false, defaultValue = "inline") final String disposition,
-            @RequestAttribute(required = false) final Boolean metadata) 
-                throws Exception {
-        
+            @RequestAttribute(required = false) final Boolean metadata) throws Exception {
+
         final Node node = driver.getNodeById(driver.getBranch(branchId).getId(), nodeId, CloudcmsDriver.USE_CACHE);
-        final Builder dispositionBuilder = disposition.equalsIgnoreCase("inline") ? ContentDisposition.inline() : ContentDisposition.attachment();
-        final String fileName = (!name.isEmpty() ? name : node.getTitle());
-        final byte[] bytes = driver.getDocumentPreviewBytesById(driver.getBranch(branchId).getId(), nodeId, attachmentId, mimetype, size, CloudcmsDriver.USE_CACHE);
+        final byte[] bytes = driver.getDocumentPreviewBytesById(driver.getBranch(branchId).getId(), nodeId,
+                attachmentId, mimetype, size, CloudcmsDriver.USE_CACHE);
 
         return ResponseEntity.ok()
-            .header("Content-Disposition", dispositionBuilder.filename(fileName).build().toString())
-            .contentLength(bytes.length)
-            .contentType(MediaType.parseMediaType(mimetype))
-            .body(bytes);        
+                .header("Content-Disposition",
+                        ContentDisposition.builder(disposition.equalsIgnoreCase("inline") ? "inline" : "attachment")
+                                .filename(name != null ? name : node.getTitle()).build().toString())
+                .contentLength(bytes.length).contentType(MediaType.parseMediaType(mimetype)).body(bytes);
     }
 }

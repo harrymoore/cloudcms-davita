@@ -70,14 +70,21 @@ public class DocumentViewerController {
             @RequestParam(required = false, defaultValue = "true") final String useCache, final Model map)
             throws CmsDriverBranchNotFoundException, ForbiddenException {
 
-        log.debug("getDocument {}", request.getRequestURI());
+        log.info("getDocument {}", request.getRequestURI());
 
         List<String> userRoles = Collections.emptyList();
 
         if (request.getSession(false) == null) {
-            log.debug("No session");
+            log.info("No session");
+            map.addAttribute("userEmail", "");
+            map.addAttribute("userId", "");
+            map.addAttribute("userName", "");
+            map.addAttribute("userRoles", "");
         } else {
             KeycloakPrincipal<?> principal = (KeycloakPrincipal<?>) request.getUserPrincipal();
+            map.addAttribute("userEmail", principal.getKeycloakSecurityContext().getToken().getEmail());
+            map.addAttribute("userId", principal.getKeycloakSecurityContext().getToken().getId());
+
             Access resourceAccess = principal.getKeycloakSecurityContext().getToken()
                     .getResourceAccess(keycloakResource);
 
@@ -85,7 +92,9 @@ public class DocumentViewerController {
                 userRoles = new ArrayList<String>(resourceAccess.getRoles());
             }
 
-            log.debug("Session user {} with roles {}", principal.getName(), userRoles);
+            log.info("Session user {} with roles {}", principal.getName(), userRoles);
+            map.addAttribute("userName", principal.getName());
+            map.addAttribute("userRoles", String.join(",", userRoles));
         }
 
         map.addAttribute("searchText", searchText == null ? "" : searchText);
@@ -159,7 +168,7 @@ public class DocumentViewerController {
             }
 
             if (!entitled) {
-                throw new ForbiddenException("Not entitles to this document");
+                throw new ForbiddenException();
             }
 
             map.addAttribute("document", node);
