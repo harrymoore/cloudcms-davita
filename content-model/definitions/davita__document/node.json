@@ -8,8 +8,7 @@
 	"properties": {
 		"title": {
 			"type": "string",
-			"title": "title",
-			"required": true
+			"title": "title"
 		},
 		"description": {
 			"type": "string",
@@ -34,14 +33,13 @@
 				}
 			}
 		},
-		"entitlements": {
-			"type": "array",
-			"title": "List of entitled Groups and Individuals",
-			"_relator": {
-				"associationType": "davita:entitled",
-				"nodeType": "davita:principal"
-			}
-		},
+        "entitlements": {
+            "type": "array",
+            "title": "Make Available to these Davita Roles",
+            "items": {
+                "type": "string"
+            }
+        },
 		"document": {
 			"type": "array",
 			"title": "Document Content",
@@ -51,6 +49,7 @@
 			}
 		}
 	},
+    "required": ["title"],
 	"dependencies": {},
 	"$schema": "http://json-schema.org/draft-04/schema#"
 }

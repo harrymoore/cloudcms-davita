@@ -1,9 +1,0 @@
-{
-	"title": "entitled",
-	"description": "Mark a Principal (Group/User) as being entitled to a document",
-	"_qname": "davita:entitled",
-	"_type": "d:association",
-	"type": "object",
-	"_parent": "a:linked",
-	"properties": {}
-}

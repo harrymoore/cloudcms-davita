@@ -158,9 +158,8 @@ public class DocumentViewerController {
 
             // check that role assignments allow access to this document
             if (node.get("entitlements") != null) {
-                for (Map<String, String> entitlement : (List<Map<String, String>>) node.get("entitlements")) {
-                    // log.debug("role {}", entitlement.get("title"));
-                    if (userRoles.contains(entitlement.get("title"))) {
+                for (String entitlement : (List<String>) node.get("entitlements")) {
+                    if (userRoles.contains(entitlement)) {
                         entitled = true;
                         continue;
                     }

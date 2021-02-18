@@ -3,17 +3,20 @@
 	"engineId": "alpaca1",
 	"fields": {
 		"title": {
+            "order": 1,
 			"type": "text",
 			"label": "Title",
 			"required": true,
 			"default": ""
 		},
 		"description": {
+            "order": 2,
 			"type": "textarea",
 			"label": "Description",
 			"default": ""
 		},
 		"metadata": {
+            "order": 1000,
 			"type": "array",
 			"label": "Additional Metadata",
 			"items": {
@@ -35,18 +38,26 @@
 				}
 			}
 		},
-		"entitlements": {
-			"type": "node-picker",
-			"label": "List of entitled Groups and Individuals",
-			"required": false,
-			"picker": {
-				"typeQName": "davita:principal",
-				"associationType": "davita:entitled",
-				"includeChildTypes": false,
-				"upload": false
-			}
+        "entitlements": {
+            "order": 3,
+            "type": "checkbox",
+            "required": false,
+            "multiple": true,
+            "dataSource": {
+                "connector": true,
+                "config": {
+                    "query": {
+                        "_type": "davita:principal"
+                    },
+                    "mappings": {
+                        "value": "title",
+                        "text": "description"
+                    }
+                }
+            }        
 		},
 		"document": {
+            "order": 4,
 			"type": "related-content",
 			"label": "Document Content",
 			"required": false,
