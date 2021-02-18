@@ -9,12 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CacheLogger implements CacheEventListener<Object, Object> {
-
   private final Logger log = LoggerFactory.getLogger(CacheLogger.class);
 
   @Override
   public void onEvent(CacheEvent<?, ?> cacheEvent) {
     log.debug("{} {}", cacheEvent.getType(), cacheEvent.getKey());
-    // log.trace("{} {} {}", cacheEvent.getType(), cacheEvent.getKey(), cacheEvent.toString());
   }
 }
