@@ -1,7 +1,7 @@
 {
 	"_qname": "davita:document",
 	"_type": "d:type",
-	"title": "Davita Document",
+	"title": "Davita Physician Communication",
 	"type": "object",
 	"_parent": "n:node",
 	"sort": 1,
@@ -37,7 +37,14 @@
             "type": "array",
             "title": "Make Available to these Davita Roles",
             "items": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                    "user",
+                    "DaVita Attending",
+                    "DaVita Attending and JV Partner",
+                    "DaVita Medical Director",
+                    "DaVita Medical Director and JV Partner"
+                ]
             }
         },
 		"document": {

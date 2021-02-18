@@ -1,5 +1,5 @@
 {
-	"title": "Davita Document Communication",
+	"title": "Davita Physician Communication",
 	"engineId": "alpaca1",
 	"fields": {
 		"title": {
@@ -43,18 +43,15 @@
             "type": "checkbox",
             "required": false,
             "multiple": true,
-            "dataSource": {
-                "connector": true,
-                "config": {
-                    "query": {
-                        "_type": "davita:principal"
-                    },
-                    "mappings": {
-                        "value": "title",
-                        "text": "description"
-                    }
-                }
-            }        
+            "removeDefaultNone": true,
+            "sort": false,
+            "optionLabels": [
+                "Everyone",
+                "DaVita Attending",
+                "DaVita Attending and JV Partner",
+                "DaVita Medical Director",
+                "DaVita Medical Director and JV Partner"
+            ]        
 		},
 		"document": {
             "order": 4,
