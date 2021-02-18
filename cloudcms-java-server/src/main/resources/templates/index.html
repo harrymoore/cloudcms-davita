@@ -135,16 +135,11 @@
 
                     <div th:if="${attachment.isOther}">
                         <!-- Other type of content -->
-                        <div th:id="'pdf'+${attachmentIndex.index}">
+                        <div th:id="'doc'+${attachmentIndex.index}">
+                            <p>
+                                <span>Download </span><a th:href="@{/preview/{documentId}?attachmentId=default&mimetype=application/pdf&size=500(documentId=${attachment.id})}" th:text="${attachment.title}"></a>
+                            </p>
                         </div>
-
-                        <script th:inline="JavaScript">
-                            var link = "[('/preview/'+ ${attachment.id} + '?attachmentId=default&mimetype=application/pdf&size=500')]";
-                            PDFObject.embed(link, [['#pdf' + ${ attachmentIndex.index }]], {
-                                height: "900px",
-                                forcePDFJS: true
-                            });
-                        </script>
                     </div>
                 </div>
             </div>

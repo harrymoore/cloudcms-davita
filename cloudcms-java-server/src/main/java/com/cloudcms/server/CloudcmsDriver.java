@@ -209,7 +209,7 @@ public class CloudcmsDriver {
         }
 
         if (!roleFilter.isEmpty()) {
-            query.set("entitlements.title", JsonUtil.createObject().set("$in", JsonUtil.createArray(roleFilter)));
+            query.set("entitlements", JsonUtil.createObject().set("$in", JsonUtil.createArray(roleFilter)));
         }
 
         if (rangeFilter != null) {
@@ -217,7 +217,8 @@ public class CloudcmsDriver {
             query.set("_system.modified_on.ms", JsonUtil.createObject().put("$gt", ms));
         }
 
-        query.set("_fields", JsonUtil.createObject().put("title", 1).put("_type", 1).put("_qname", 1).put("_system.modified_on.iso_8601", 1));
+        query.set("_fields", JsonUtil.createObject().put("title", 1).put("_type", 1).put("_qname", 1)
+                .put("_system.modified_on.iso_8601", 1));
 
         if (!tagFilter.isEmpty()) {
             query.put("tags", tagFilter);
@@ -245,7 +246,8 @@ public class CloudcmsDriver {
         log.debug("search nodes by for string {}", text);
 
         ObjectNode search = JsonUtil.createObject();
-        search.set("search", JsonUtil.createObject().set("query", JsonUtil.createObject().set("query_string", JsonUtil.createObject().put("query", text))));
+        search.set("search", JsonUtil.createObject().set("query",
+                JsonUtil.createObject().set("query_string", JsonUtil.createObject().put("query", text))));
         search.set("_fields", JsonUtil.createObject().put("title", 1).put("_type", 1).put("_qname", 1));
 
         List<Node> list = new ArrayList<>();
@@ -253,8 +255,8 @@ public class CloudcmsDriver {
 
         return list;
     }
-    
-    private static final String[] types = {NODE_TYPE};
+
+    private static final String[] types = { NODE_TYPE };
     private static final ObjectNode traverse = JsonUtil.createObject();
     static {
         traverse.set("associations", JsonUtil.createObject().put("a:linked", "INCOMING"));
@@ -263,7 +265,8 @@ public class CloudcmsDriver {
     }
 
     /**
-     * find nodes on a branch. uses the node "find" API call rather than the branch "find" so the tranverse option can be used
+     * find nodes on a branch. uses the node "find" API call rather than the branch
+     * "find" so the tranverse option can be used
      * 
      * @param branchId
      * @param text

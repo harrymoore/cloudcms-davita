@@ -3,8 +3,11 @@
  */
 package com.cloudcms.controllers;
 
-import com.cloudcms.server.CmsDriverBranchNotFoundException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.cloudcms.server.CloudcmsDriver;
+import com.cloudcms.server.CmsDriverBranchNotFoundException;
 
 import org.gitana.platform.client.attachment.Attachment;
 import org.gitana.platform.client.node.Node;
@@ -12,7 +15,7 @@ import org.gitana.platform.client.node.Node;
 // import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
-import org.springframework.http.ContentDisposition.Builder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -71,25 +74,32 @@ public class StaticController {
      * @param name
      * @param metadata
      * @return
+     * @throws CmsDriverBranchNotFoundException
      * @throws Exception
      */
     @GetMapping(value = "/preview/{nodeId}")
-    public @ResponseBody ResponseEntity<byte[]> previewById(@PathVariable final String nodeId,
-            @RequestParam(required = false) final String branchId,
-            @RequestParam(required = true) final String attachmentId,
-            @RequestParam(required = false) final String name,
-            @RequestParam(required = true) final String mimetype, @RequestParam(required = true) final String size,
-            @RequestParam(required = false, defaultValue = "inline") final String disposition,
-            @RequestAttribute(required = false) final Boolean metadata) throws Exception {
+    public @ResponseBody ResponseEntity<byte[]> previewById(final HttpServletRequest request, final HttpServletResponse response,
+        @PathVariable final String nodeId,
+        @RequestParam(required = false) final String branchId,
+        @RequestParam(required = true) final String attachmentId, @RequestParam(required = false) final String name,
+        @RequestParam(required = true) final String mimetype, @RequestParam(required = true) final String size,
+        @RequestParam(required = false, defaultValue = "inline") final String disposition,
+        @RequestAttribute(required = false) final Boolean metadata) throws CmsDriverBranchNotFoundException {
 
         final Node node = driver.getNodeById(driver.getBranch(branchId).getId(), nodeId, CloudcmsDriver.USE_CACHE);
-        final byte[] bytes = driver.getDocumentPreviewBytesById(driver.getBranch(branchId).getId(), nodeId,
-                attachmentId, mimetype, size, CloudcmsDriver.USE_CACHE);
 
-        return ResponseEntity.ok()
+        try {
+            byte[] responseBytes = driver.getDocumentPreviewBytesById(driver.getBranch(branchId).getId(), nodeId, attachmentId,
+                mimetype, size, CloudcmsDriver.USE_CACHE);
+
+            return ResponseEntity.ok()
                 .header("Content-Disposition",
-                        ContentDisposition.builder(disposition.equalsIgnoreCase("inline") ? "inline" : "attachment")
-                                .filename(name != null ? name : node.getTitle()).build().toString())
-                .contentLength(bytes.length).contentType(MediaType.parseMediaType(mimetype)).body(bytes);
+                ContentDisposition.builder(disposition.equalsIgnoreCase("inline") ? "inline" : "attachment")
+                    .filename(name != null ? name : node.getTitle()).build().toString())
+                    .contentLength(responseBytes.length).contentType(MediaType.parseMediaType(mimetype)).body(responseBytes);
+        } catch (Exception e) {
+            // could not generate a preview so just return original payload by redirecting to the static handler
+            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header("location", request.getRequestURL().toString().replace("/preview/", "/attachment/")).build();
+        }
     }
 }
