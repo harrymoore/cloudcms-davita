@@ -8,7 +8,10 @@ define(function (require, exports, module) {
         var url = window.location.href;
         if ($('#document-summary a').attr('href') && -1 !== $('#document-summary a').attr('href').indexOf('/davita:document')) {
             var found = url.match(rgx);
-            var appUrl = BASE_URL + found || found.groups || found.groups.doc || "";
+            var appUrl = BASE_URL;
+            if (found && found.groups && found.groups.doc) {
+                appUrl += found.groups.doc;
+            }
 
             // insert an anchor link and copy button
             if (!$('#copy-link').length) {
