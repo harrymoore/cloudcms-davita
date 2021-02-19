@@ -1,4 +1,9 @@
 {
 	"_type": 1,
-	"entitlements.id": 1
+    "title": 1,
+    "startDate": 1,
+    "endDate": 1,
+    "tags": 1,
+	"entitlements": 1,
+    "_system.modified_on.ms": -1
 }
