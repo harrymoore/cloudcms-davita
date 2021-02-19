@@ -1,16 +1,26 @@
 define(function (require, exports, module) {
     var $ = require("jquery");
 
-    var BASE_URL = "http://localhost.com:8080/documents/";
+    var BASE_URL_PATTERN = "http://localhost.com:8080/documents/{{document.id}}";
     var rgx = /\/documents\/(?<doc>[^/]+)/;
 
     $(document).on('cloudcms-ready', function (ev) {
         var url = window.location.href;
         if ($('#document-summary a').attr('href') && -1 !== $('#document-summary a').attr('href').indexOf('/davita:document')) {
             var found = url.match(rgx);
-            var appUrl = BASE_URL;
+            var appUrl = "";
+
+            var previews = window.Ratchet.observable("project").get().previews;
+            if (previews) {
+                previews.forEach(function(preview) {
+                    if (preview.id === "production") {
+                        BASE_URL_PATTERN = preview.url;
+                    }
+                });
+            }
+        
             if (found && found.groups && found.groups.doc) {
-                appUrl += found.groups.doc;
+                appUrl = BASE_URL_PATTERN.replace("{{document.id}}", found.groups.doc);
             }
 
             // insert an anchor link and copy button
@@ -21,7 +31,6 @@ define(function (require, exports, module) {
                 `);
 
                 $('#copy-link').on('click', function (event) {
-                    // http://localhost.com:8080/documents/x
                     var el = document.createElement('textarea');
                     el.value = appUrl;
                     document.body.appendChild(el);
