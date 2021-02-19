@@ -6,26 +6,28 @@ define(function (require, exports, module) {
 
     $(document).on('cloudcms-ready', function (ev) {
         var url = window.location.href;
-        if (url && -1 !== url.indexOf('/content/davita:document/documents/')) {
+        if ($('#document-summary a').attr('href') && -1 !== $('#document-summary a').attr('href').indexOf('/davita:document')) {
             var found = url.match(rgx);
-            var  appUrl = BASE_URL + found.groups.doc || "";
+            var appUrl = BASE_URL + found || found.groups || found.groups.doc || "";
 
             // insert an anchor link and copy button
-            $('#hud > div > div:nth-child(1) > div > div > div > div').append(`
-                <a href="${appUrl}" target="redirected"><button class="btn btn-default">Open In App</button></a>
-                <button class="btn btn-default" id="copy-link" data-clipboard-action="copy" data-clipboard-target="#app-link">Copy App Link</button>
-                <p hidden id="app-link" class="app-link">${appUrl}</p>
-            `);
+            if (!$('#copy-link').length) {
+                $('#hud > div > div:nth-child(1) > div > div > div > div').append(`
+                    <a href="${appUrl}" target="redirected"><button class="btn btn-default">Open In App</button></a>
+                    <button class="btn btn-default" id="copy-link" data-clipboard-action="copy" data-clipboard-target="#app-link">Copy App Link</button>
+                `);
 
-            $('#copy-link').on('click', function (event) {
-                // http://localhost.com:8080/documents/x
-                var el = document.createElement('textarea');
-                el.value = appUrl;
-                document.body.appendChild(el);
-                el.select();
-                document.execCommand('copy');
-                document.body.removeChild(el);
-            });
+                $('#copy-link').on('click', function (event) {
+                    // http://localhost.com:8080/documents/x
+                    var el = document.createElement('textarea');
+                    el.value = appUrl;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                });
+                    
+            }
         }
     });
 
