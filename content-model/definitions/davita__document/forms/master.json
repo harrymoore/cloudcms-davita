@@ -15,6 +15,18 @@
 			"label": "Description",
 			"default": ""
 		},
+        "startDate": {
+            "order": 3,
+			"type": "epoch-date",
+            "format": "LL",
+			"title": "Start Date"
+		},
+		"endDate": {
+            "order": 4,
+			"type": "epoch-date",
+            "format": "LL",
+			"title": "End Date"
+		},
 		"metadata": {
             "order": 1000,
 			"type": "array",
@@ -39,7 +51,7 @@
 			}
 		},
         "entitlements": {
-            "order": 3,
+            "order": 5,
             "type": "checkbox",
             "required": false,
             "multiple": true,
@@ -54,7 +66,7 @@
             ]        
 		},
 		"document": {
-            "order": 4,
+            "order": 6,
 			"type": "related-content",
 			"label": "Document Content",
 			"required": false,
