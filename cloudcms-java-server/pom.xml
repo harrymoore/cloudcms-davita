@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.gitana</groupId>
             <artifactId>gitana-java-driver</artifactId>
-            <version>1.0.39-SNAPSHOT</version>
+            <version>1.0.38</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
