@@ -70,22 +70,8 @@
                         <h2 th:text="${document.title}"></h2>
                         <h5 class="x-format-date"
                             th:text="${document.getSystemObject().get('modified_on').get('iso_8601').textValue()}"></h5>
-                    </div>
-                </div>
 
-                <div class="card px-1 py-1 mx-1 my-1"
-                    th:if="${document.get('metadata') != null && document.get('metadata').size()>0}">
-                    <div class="card-body px-1 py-0 mx-0 my-0">
-                        <table class="table-sm table-borderless">
-                            <tbody>
-                                <tr th:each="customMetadataTag : ${document.get('metadata')}">
-                                    <td class="text-start p-0" style="width: 125px;"
-                                        th:text="${customMetadataTag.get('name')}">
-                                    </td>
-                                    <td class="text-start p-0" th:text="${customMetadataTag.get('value')}"></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <h5 th:each="customMetadataTag : ${document.get('metadata')}" th:text="${customMetadataTag.get('name') + ': ' + customMetadataTag.get('value')}"></h5>                        
                     </div>
                 </div>
 
