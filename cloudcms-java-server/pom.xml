@@ -224,7 +224,7 @@
                             </archive>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!-- <execution>
                         <id>docker-executable-jar</id>
                         <goals>
                             <goal>jar</goal>
@@ -242,7 +242,7 @@
                                 </manifestEntries>
                             </archive>
                         </configuration>
-                    </execution>
+                    </execution> -->
                 </executions>
             </plugin>
             <plugin>
@@ -264,6 +264,17 @@
                             <goal>build-info</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>spring-boot</classifier>
+                            <mainClass>
+                                com.cloudcms.CloudcmsJavaServerApplication
+                            </mainClass>
+                        </configuration>
+                    </execution>                    
                 </executions>
             </plugin>
             <plugin>
@@ -303,7 +314,7 @@
 					  Create new docker image using Dockerfile which must be present in current working directory.
 					  Tag the image using maven project version information.
 					-->
-                    <execution>
+                    <!-- <execution>
                         <id>docker-build</id>
                         <phase>install</phase>
                         <goals>
@@ -319,10 +330,10 @@
                                 <argument>.</argument>
                             </arguments>
                         </configuration>
-                    </execution>
+                    </execution> -->
 
                     <!-- Login and Push the image to a docker repo. -->
-                    <execution>
+                    <!-- <execution>
                         <id>docker-login</id>
                         <phase>deploy</phase>
                         <goals>
@@ -355,7 +366,7 @@
                                 <argument>${project.groupId}/${project.artifactId}:${project.version}</argument>
                             </arguments>
                         </configuration>
-                    </execution>
+                    </execution> -->
                 </executions>
             </plugin>
             <!-- License file helper -->
