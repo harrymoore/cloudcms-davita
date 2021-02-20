@@ -3,6 +3,7 @@
  */
 package com.cloudcms.server;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -204,6 +205,13 @@ public class CloudcmsDriver {
         ObjectNode query = JsonUtil.createObject();
         query.put("_type", type);
 
+        // startDate and endDate filtering
+        long now = Instant.now().getEpochSecond() * 1000L;
+        query.set("$and", JsonUtil.createArray()
+            .add(JsonUtil.createObject().set("$or", JsonUtil.createArray().add(JsonUtil.createObject().set("startDate", JsonUtil.createObject().put("$exists", false))).add(JsonUtil.createObject().set("startDate", JsonUtil.createObject().put("$lte", now)))))
+            .add(JsonUtil.createObject().set("$or", JsonUtil.createArray().add(JsonUtil.createObject().set("endDate", JsonUtil.createObject().put("$exists", false))).add(JsonUtil.createObject().set("endDate", JsonUtil.createObject().put("$gte", now)))))
+        );
+
         if (!idList.isEmpty()) {
             query.set("_doc", JsonUtil.createObject().set("$in", JsonUtil.createArray(idList)));
         }
@@ -217,7 +225,7 @@ public class CloudcmsDriver {
             query.set("_system.modified_on.ms", JsonUtil.createObject().put("$gt", ms));
         }
 
-        query.set("_fields", JsonUtil.createObject().put("title", 1).put("_type", 1).put("_qname", 1)
+        query.set("_fields", JsonUtil.createObject().put("title", 1).put("startDate", 1).put("endDate", 1).put("_type", 1).put("_qname", 1)
                 .put("_system.modified_on.iso_8601", 1));
 
         if (!tagFilter.isEmpty()) {
