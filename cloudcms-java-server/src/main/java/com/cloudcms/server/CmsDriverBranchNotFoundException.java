@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 Gitana Software, Inc.
+ * Copyright (C) 2021 Gitana Software, Inc.
  */
 package com.cloudcms.server;
 

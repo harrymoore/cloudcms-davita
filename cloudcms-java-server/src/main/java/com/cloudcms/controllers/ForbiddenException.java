@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2021 Gitana Software, Inc.
+ */
 package com.cloudcms.controllers;
 
 import org.springframework.http.HttpStatus;

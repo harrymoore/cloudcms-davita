@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 Gitana Software, Inc.
+ * Copyright (C) 2021 Gitana Software, Inc.
  */
 package com.cloudcms.server;
 
@@ -97,7 +97,7 @@ public class CloudcmsDriver {
         contentRepository = (Repository) project.getStack().readDataStore("content");
 
         driver = DriverContext.getDriver();
-        ((RemoteImpl) driver.getRemote()).setPaths(false);
+        // ((RemoteImpl) driver.getRemote()).setPaths(false);
         ((RemoteImpl) driver.getRemote()).setMetadata(true);
         ((RemoteImpl) driver.getRemote()).setFull(true);
         locale = new Locale(defaultLocale);

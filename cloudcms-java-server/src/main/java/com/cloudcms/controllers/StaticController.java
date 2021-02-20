@@ -1,7 +1,9 @@
 /**
- * Copyright (C) 2020 Gitana Software, Inc.
+ * Copyright (C) 2021 Gitana Software, Inc.
  */
 package com.cloudcms.controllers;
+
+import java.time.Duration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,6 +16,7 @@ import org.gitana.platform.client.node.Node;
 // import org.slf4j.Logger;
 // import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -60,6 +63,7 @@ public class StaticController {
                 .header("Content-Disposition",
                         ContentDisposition.builder(disposition.equalsIgnoreCase("inline") ? "inline" : "attachment")
                                 .filename(name != null ? name : node.getTitle()).build().toString())
+                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(60)).cachePrivate())
                 .contentLength(attachment.getLength())
                 .contentType(MediaType.parseMediaType(attachment.getContentType())).body(bytes);
     }
@@ -94,9 +98,10 @@ public class StaticController {
 
             return ResponseEntity.ok()
                 .header("Content-Disposition",
-                ContentDisposition.builder(disposition.equalsIgnoreCase("inline") ? "inline" : "attachment")
-                    .filename(name != null ? name : node.getTitle()).build().toString())
-                    .contentLength(responseBytes.length).contentType(MediaType.parseMediaType(mimetype)).body(responseBytes);
+                    ContentDisposition.builder(disposition.equalsIgnoreCase("inline") ? "inline" : "attachment")
+                .filename(name != null ? name : node.getTitle()).build().toString())
+                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(60)).cachePrivate())
+                .contentLength(responseBytes.length).contentType(MediaType.parseMediaType(mimetype)).body(responseBytes);
         } catch (Exception e) {
             // could not generate a preview so just return original payload by redirecting to the static handler
             return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header("location", request.getRequestURL().toString().replace("/preview/", "/attachment/")).build();
