@@ -142,13 +142,6 @@
         $(".x-format-date").each(function (index) {
             $(this).text(moment($(this).text()).format('L'));
         });
-
-        // handle filter buttons
-        $("button.filter").each(function (index) {
-            this.addEventListener('click', function (e) {
-                console.log("x");
-            });
-        })
     </script>
     <script th:if="${hasVideo || hasAudio}" src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
     <script th:if="${@environment.getProperty('pendo.enabled')}" th:inline="JavaScript">
