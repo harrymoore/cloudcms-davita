@@ -29,8 +29,11 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-light bg-light col-sm-12">
+    <nav class="navbar navbar-light bg-white col-sm-12 border-bottom border-secondary p-1">
         <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/documents}">
+                <img th:src="'/davita-logo.png'" alt="Davita Document Viewer" height="80">
+            </a>
             <div class="justify-content-start" id="navbarSupportedContent">
                 <form class="d-flex" method="GET" th:action="@{/documents}">
                     <input class="form-control me-2" name="searchText" id="searchText" th:value="${searchText}" placeholder="Search.." aria-label="Search">
