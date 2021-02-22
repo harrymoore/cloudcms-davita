@@ -40,6 +40,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class DocumentViewerController {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
+    @Value("${keycloak.enabled}")
+    private boolean keycloakEnabled;
+
     @Value("${app.ui-template}")
     private String template;
 
@@ -78,27 +81,36 @@ public class DocumentViewerController {
 
         List<String> userRoles = Collections.emptyList();
 
-        if (request.getSession(false) == null) {
-            log.info("No session");
-            map.addAttribute("userEmail", "");
-            map.addAttribute("userId", "");
-            map.addAttribute("userName", "");
-            map.addAttribute("userRoles", "");
-        } else {
-            KeycloakPrincipal<?> principal = (KeycloakPrincipal<?>) request.getUserPrincipal();
-            map.addAttribute("userEmail", principal.getKeycloakSecurityContext().getToken().getEmail());
-            map.addAttribute("userId", principal.getKeycloakSecurityContext().getToken().getId());
+        map.addAttribute("userEmail", "");
+        map.addAttribute("userId", "");
+        map.addAttribute("userName", "");
+        map.addAttribute("userRoles", userRoles);
 
-            Access resourceAccess = principal.getKeycloakSecurityContext().getToken()
-                    .getResourceAccess(keycloakResource);
+        if (keycloakEnabled) {
+            if (request.getSession(false) == null) {
+                log.info("No session");
+                throw new ForbiddenException();
+            } else {
+                KeycloakPrincipal<?> principal = (KeycloakPrincipal<?>) request.getUserPrincipal();
+                map.addAttribute("userEmail", principal.getKeycloakSecurityContext().getToken().getEmail());
+                map.addAttribute("userId", principal.getKeycloakSecurityContext().getToken().getId());
 
-            if (resourceAccess.getRoles() != null && !resourceAccess.getRoles().isEmpty()) {
-                userRoles = new ArrayList<String>(resourceAccess.getRoles());
-            }
+                Access resourceAccess = principal.getKeycloakSecurityContext().getToken()
+                        .getResourceAccess(keycloakResource);
 
-            log.info("Session user {} with roles {}", principal.getName(), userRoles);
-            map.addAttribute("userName", principal.getName());
-            map.addAttribute("userRoles", String.join(",", userRoles));
+                if (resourceAccess.getRoles() != null && !resourceAccess.getRoles().isEmpty()) {
+                    userRoles = new ArrayList<String>(resourceAccess.getRoles());
+                }
+
+                log.info("Session user {} with roles {}", principal.getName(), userRoles);
+                map.addAttribute("userName", principal.getName());
+                map.addAttribute("userRoles", String.join(",", userRoles));
+
+                if (userRoles.isEmpty()) {
+                    log.info("User has no role");
+                    throw new ForbiddenException();
+                }
+            }            
         }
 
         map.addAttribute("searchText", searchText == null ? "" : searchText);
@@ -137,7 +149,7 @@ public class DocumentViewerController {
             // add the list of documents to the model so that an index can be built
             if (!indexNodesList.isEmpty()) {
                 indexNodes = driver.queryNodesByType(driver.getBranch(branchId).getId(), indexNodesList,
-                        userRoles, rangeFilter, tagFilter, CloudcmsDriver.NODE_TYPE, cache);
+                userRoles, rangeFilter, tagFilter, CloudcmsDriver.NODE_TYPE, cache);
 
             }
 
@@ -161,13 +173,17 @@ public class DocumentViewerController {
             Node node = driver.getNodeById(driver.getBranch(branchId).getId(), nodeId, cache);
 
             // check that role assignments allow access to this document
-            if (node.get("entitlements") != null) {
-                for (String entitlement : (List<String>) node.get("entitlements")) {
-                    if (userRoles.contains(entitlement)) {
-                        entitled = true;
-                        continue;
+            if (keycloakEnabled) {
+                if (node.get("entitlements") != null) {
+                    for (String entitlement : (List<String>) node.get("entitlements")) {
+                        if (userRoles.contains(entitlement)) {
+                            entitled = true;
+                            continue;
+                        }
                     }
                 }
+            } else {
+                entitled = true;
             }
 
             if (!entitled) {
