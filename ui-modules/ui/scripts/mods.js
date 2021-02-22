@@ -26,7 +26,7 @@ define(function (require, exports, module) {
             // insert an anchor link and copy button
             if (!$('#copy-link').length) {
                 $('#hud > div > div:nth-child(1) > div > div > div > div').append(`
-                    <a href="${appUrl}" target="redirected"><button class="btn btn-default">Open In App</button></a>
+                    <a href="${appUrl}" target="_blank"><button class="btn btn-default">Open In App</button></a>
                     <button class="btn btn-default" id="copy-link" data-clipboard-action="copy" data-clipboard-target="#app-link">Copy App Link</button>
                 `);
 
