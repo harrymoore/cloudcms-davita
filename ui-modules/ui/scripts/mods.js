@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
     var $ = require("jquery");
 
-    var BASE_URL_PATTERN = "http://localhost.com:8080/documents/{{document.id}}";
+    var BASE_URL_PATTERN = "http://localhost.com:8080/documents/{{document.id}}?clearCache=true";
     var rgx = /\/documents\/(?<doc>[^/]+)/;
 
     $(document).on('cloudcms-ready', function (ev) {
@@ -9,24 +9,23 @@ define(function (require, exports, module) {
         if ($('#document-summary a').attr('href') && -1 !== $('#document-summary a').attr('href').indexOf('/davita:document')) {
             var found = url.match(rgx);
             var appUrl = "";
-
-            var previews = window.Ratchet.observable("project").get().previews;
-            if (previews) {
-                previews.forEach(function(preview) {
-                    if (preview.id === "production") {
-                        BASE_URL_PATTERN = preview.url;
-                    }
-                });
-            }
         
             if (found && found.groups && found.groups.doc) {
+                var previews = window.Ratchet.observable("project").get().previews;
+                if (previews) {
+                    previews.forEach(function(preview) {
+                        if (preview.id === "production") {
+                            BASE_URL_PATTERN = preview.url;
+                        }
+                    });
+                }
+
                 appUrl = BASE_URL_PATTERN.replace("{{document.id}}", found.groups.doc);
             }
 
             // insert an anchor link and copy button
             if (!$('#copy-link').length) {
                 $('#hud > div > div:nth-child(1) > div > div > div > div').append(`
-                    <a href="${appUrl}" target="_blank"><button class="btn btn-default">Open In App</button></a>
                     <button class="btn btn-default" id="copy-link" data-clipboard-action="copy" data-clipboard-target="#app-link">Copy App Link</button>
                 `);
 

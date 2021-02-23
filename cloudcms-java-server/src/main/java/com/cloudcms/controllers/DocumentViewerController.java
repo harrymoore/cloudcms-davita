@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.cloudcms.cache.CacheClearService;
 import com.cloudcms.server.CloudcmsDriver;
 import com.cloudcms.server.CmsDriverBranchNotFoundException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -52,6 +53,9 @@ public class DocumentViewerController {
     @Autowired
     private CloudcmsDriver driver;
 
+    @Autowired
+    private CacheClearService cacheClearService;
+
     @GetMapping(value = { "/" })
     public String redirectToRoot() {
         return "redirect:/documents";
@@ -69,11 +73,17 @@ public class DocumentViewerController {
             @RequestParam(required = false, defaultValue = "") final String searchText,
             @RequestParam(required = false) final String rangeFilter,
             @RequestParam(required = false, defaultValue = "") final String tagFilter,
-            @RequestParam(required = false, defaultValue = "true") final String useCache, final Model map)
+            @RequestParam(required = false, defaultValue = "true") final String useCache, 
+            @RequestParam(required = false, defaultValue = "false") final String clearCache, 
+            final Model map)
             throws CmsDriverBranchNotFoundException, ForbiddenException {
 
         log.info("getDocument {}", request.getRequestURI());
-        
+
+        if (Boolean.parseBoolean(useCache)) {
+            cacheClearService.clearCache();
+        }
+
         response.setHeader("Cache-Control", CacheControl.maxAge(Duration.ofMinutes(60)).cachePrivate().toString());
 
         List<String> userRoles = Collections.emptyList();
