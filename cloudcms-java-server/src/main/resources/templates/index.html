@@ -71,9 +71,9 @@
                 <div class="card px-1 py-1 mx-1 my-1">
                     <div class="card-body px-1 py-0 mx-0 my-0">
                         <h2 th:text="${document.title}"></h2>
-                        <h5 class="x-format-date"
-                            th:text="${document.getSystemObject().get('modified_on').get('iso_8601').textValue()}"></h5>
-
+                        <!-- <h5 class="x-format-date"
+                            th:text="${document.getSystemObject().get('modified_on').get('iso_8601').textValue()}"></h5> -->
+                        <h5 th:if="${document.description != ''}" th:text="${document.description}"></h5>
                         <h5 th:each="customMetadataTag : ${document.get('metadata')}" th:text="${customMetadataTag.get('name') + ': ' + customMetadataTag.get('value')}"></h5>                        
                     </div>
                 </div>
