@@ -1,2 +1,2 @@
 web: java $JAVA_OPTS -jar target/content-server-1.0.0-spring-boot.jar com.cloudcms.CloudcmsJavaServerApplication
-port: 80
+port: 8080
