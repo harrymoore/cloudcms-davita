@@ -43,9 +43,6 @@ public class DocumentViewerController {
     @Value("${keycloak.enabled}")
     private boolean keycloakEnabled;
 
-    @Value("${app.ui-template}")
-    private String template;
-
     @Value("${app.ui-tags:false}")
     private boolean useTags;
 
@@ -260,6 +257,6 @@ public class DocumentViewerController {
             map.addAttribute("tags", driver.queryNodes(driver.getBranch(branchId).getId(), query, pagination, cache));
         }
 
-        return template;
+        return "index";
     }
 }

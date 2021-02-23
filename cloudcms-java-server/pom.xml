@@ -156,7 +156,7 @@
                     </processTypes>
                 </configuration>                
             </plugin>
-            <!-- <plugin>
+            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.2.0</version>
                 <executions>
@@ -173,13 +173,14 @@
                                     <directory>${basedir}</directory>
                                     <includes>
                                         <include>gitana.properties</include>
+                                        <include>application.properties</include>
                                     </includes>
                                 </resource>
                             </resources>
                         </configuration>
                     </execution>
                </executions>
-            </plugin>             -->
+            </plugin>            
             <plugin>
                 <!-- mvn versions:display-plugin-updates -->
                 <groupId>org.apache.maven.plugins</groupId>
