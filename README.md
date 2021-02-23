@@ -59,10 +59,11 @@ Cloud CMS engagement artifacts for the Davita project
             Select "Operation" "Deploy"
             Select "Deployment Target" "PCOMM-LIVE master branch" (created in a previous step)
             Click "Add Publication"
+        Configure a similar Publication for the "Archived" operation
     7. Define a Preview Server
         Go to "Manage Project" / "Preview Servers"
-        Check "Production" and set "Preview URL" to [SERVER_URL]/documents/{{document.id}}
-            where [SERVER_URL] is the url or the java application's run-time url. ex.: http://davita.ddns.net/documents/{{document.id}}
+        Check "Production" and set "Preview URL" to [SERVER_URL]/documents/{{document.id}}?clearCache=true
+            where [SERVER_URL] is the url or the java application's run-time url. ex.: http://davita.ddns.net/documents/{{document.id}}?clearCache=true
 
 
 ## Java App Setup:
