@@ -85,9 +85,8 @@
                         <!-- Video content -->
                         <video-js ____width="100%" height="auto" __style="overflow: hidden;"
                             th:id="'video'+${attachmentIndex.index}" class="video-js vjs-default-skin"
-                            data-setup='{"controls": true, "fluid": true, "autoplay": false, "preload": "auto"}'>
-                            <source th:src="'/attachment/'+ ${attachment.id} + '?attachmentId=default'"
-                                th:attr="type=${attachment.mimetype}" />
+                            data-setup='{"controls": true, "fluid": true, "autoplay": false, "preload": "auto", "width": 500}'>
+                            <source th:src="'/preview/'+ ${attachment.id} + '?attachmentId=default&mimetype=video/mp4&name=_preview_default_qt_500&size=500'" type="video/mp4" />
                         </video-js>
                     </div>
 
