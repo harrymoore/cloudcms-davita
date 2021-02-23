@@ -38,8 +38,7 @@ import org.springframework.stereotype.Service;
 
 // Spring will initialize as a singleton
 @Service
-@PropertySource(value = { "classpath:gitana-default.properties",
-        "file:./gitana.properties" }, ignoreResourceNotFound = true)
+@PropertySource(value = { "classpath:gitana.properties" })
 public class CloudcmsDriver {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
