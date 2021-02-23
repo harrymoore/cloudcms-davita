@@ -38,6 +38,8 @@ Cloud CMS engagement artifacts for the Davita project
         cd into ./content-model
         ./deploy-content-model.sh
     5. Before the content model can be used, install the ui-module (see above for details)
+        You may have to change the "Visibility" setting of this github project to "Public" before deploying the module.
+        Don't forget to change it back to "Private" immediately as there are oAuth security credentials stored in the Java app's properties files
     8. Configure deployment target for publishing from editorial project (PCOMM) to live project (PCOMM-LIVE)
         Go to your plaftorm / "Manage Platform" / "Deployment Targets"
         Click "Create a Deployment Target"
