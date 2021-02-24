@@ -252,13 +252,8 @@ public class CloudcmsDriver {
             throws CmsDriverBranchNotFoundException {
         log.debug("search nodes by for string {}", text);
 
-        ObjectNode search = JsonUtil.createObject();
-        search.set("search", JsonUtil.createObject().set("query",
-                JsonUtil.createObject().set("query_string", JsonUtil.createObject().put("query", text))));
-        search.set("_fields", JsonUtil.createObject().put("title", 1).put("_type", 1).put("_qname", 1));
-
         List<Node> list = new ArrayList<>();
-        getBranch(branchId).searchNodes(search).forEach((k, n) -> list.add((Node) n));
+        getBranch(branchId).searchNodes(text).forEach((k, n) -> list.add((Node) n));
 
         return list;
     }
@@ -287,7 +282,7 @@ public class CloudcmsDriver {
         log.debug("find nodes with string {}", text);
 
         List<Node> list = new ArrayList<>();
-        getBranch(branchId).rootNode().findNodes(null, text, traverse).forEach((k, n) -> list.add((Node) n));
+        getBranch(branchId).findNodes(null, text).forEach((k, n) -> list.add((Node) n));
 
         return list;
     }
