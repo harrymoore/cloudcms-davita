@@ -40,6 +40,9 @@
                     <button class="btn btn-outline-success" type="submit" value="search">Search</button>
                 </form>
             </div>
+            <a th:if="${@environment.getProperty('keycloak-logout.enabled')}" class="navbar-nav nav-item " th:href="@{/logout}">
+                <button type="button" class="btn btn-outline-dark">Logout</button>
+            </a>              
         </div>
     </nav>
 
