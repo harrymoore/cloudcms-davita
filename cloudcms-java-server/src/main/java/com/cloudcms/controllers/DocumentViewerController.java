@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,6 +52,12 @@ public class DocumentViewerController {
     @Value("${keycloak.resource}")
     private String keycloakResource;
 
+    @Value("${keycloak.realm}")
+    private String keycloakRealm;
+
+    @Value("${keycloak.auth-server-url}")
+    private String keycloakAuthUrl;
+
     @Autowired
     private CloudcmsDriver driver;
 
@@ -62,6 +69,14 @@ public class DocumentViewerController {
         return "redirect:/documents";
     }
 
+    private final String logout_url_template = "%s/realms/%s/protocol/openid-connect/auth?response_type=code&client_id=%s&redirect_uri=__base_url__&login=true&scope=openid";
+    private String logout_url;
+
+    @PostConstruct
+    private synchronized void init() {
+        logout_url = String.format(logout_url_template, keycloakAuthUrl, keycloakRealm, keycloakResource).replaceAll("\\/\\/", "\\/");
+    }
+
     @GetMapping(value = { "/logout" })
     public String logout(HttpServletRequest request) {
         try {
@@ -70,7 +85,7 @@ public class DocumentViewerController {
             log.warn("Error while logging out of session {}", e.getMessage());
         }
         
-        return "redirect:/";
+        return "redirect:" + logout_url.replace("__base_url__", request.getRequestURL().substring(0, request.getHeader("host").length() + request.getRequestURL().lastIndexOf(request.getHeader("host"))));
     }
 
     @GetMapping(value = { "/documents", "/documents/{nodeId}" })
