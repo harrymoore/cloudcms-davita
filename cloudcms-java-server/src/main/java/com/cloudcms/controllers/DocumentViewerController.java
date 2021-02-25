@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -61,11 +62,16 @@ public class DocumentViewerController {
         return "redirect:/documents";
     }
 
-    // @GetMapping(value = { "/logout" })
-    // public String logout(HttpServletRequest request) throws ServletException {
-    // request.logout();
-    // return "redirect:/documents";
-    // }
+    @GetMapping(value = { "/logout" })
+    public String logout(HttpServletRequest request) {
+        try {
+            request.logout();
+        } catch (ServletException e) {
+            log.warn("Error while logging out of session {}", e.getMessage());
+        }
+        
+        return "redirect:/";
+    }
 
     @GetMapping(value = { "/documents", "/documents/{nodeId}" })
     public String getDocument(final HttpServletRequest request, final HttpServletResponse response,
