@@ -27,8 +27,10 @@ Cloud CMS engagement artifacts for the Davita project
 
 ## Cloud CMS Setup:
     1. Create editorial and live projects
-        PCOMM       https://pixit.cloudcms.net/#/projects/344ae884f76f0ea75b5a
-        PCOMM-LIVE  https://pixit.cloudcms.net/#/projects/863848018d2a4f026200
+        PCOMM       
+            Curent PCOMM project: https://pixit.cloudcms.net/#/projects/344ae884f76f0ea75b5a
+        PCOMM-LIVE
+            Current PCOMM-LIVE project: https://pixit.cloudcms.net/#/projects/863848018d2a4f026200
     2. Create an "Application" object on each project
         This generates API keys
     3. Copy API keys to this folder as files:
@@ -62,10 +64,19 @@ Cloud CMS engagement artifacts for the Davita project
             Select "Deployment Target" "PCOMM-LIVE master branch" (created in a previous step)
             Click "Add Publication"
         Configure a similar Publication for the "Archived" operation
-    7. Define a Preview Server
+    7. Define a Preview Server on "PCOMM"
+        While in the project "PCOMM" (this step is not necessary for the "PCOMM-LIVE" project)
         Go to "Manage Project" / "Preview Servers"
         Check "Production" and set "Preview URL" to [SERVER_URL]/documents/{{document.id}}?clearCache=true
             where [SERVER_URL] is the url or the java application's run-time url. ex.: http://davita.ddns.net/documents/{{document.id}}?clearCache=true
+    8. Define a custom index on "PCOMM-LIVE"
+        Custom index will optimize queries. This custom index was designed to work with the queries made by the java application.
+        While in the project "PCOMM-LIVE" (this step is not necessary for the "PCOMM" project)
+        Go to "Manage Project" / Indexes
+        Click "Create Custom Index"
+        Enther a name. Something like "query-support"
+        Copy and paste the JSON from ./indexes/enitlement.json into JSON text block
+        Click "Create"
 
 
 ## Java App Setup:
