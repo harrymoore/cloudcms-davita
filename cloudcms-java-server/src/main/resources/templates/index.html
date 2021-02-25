@@ -118,7 +118,7 @@
 
                     <div class="card-body" th:if="${attachment.isImage}">
                         <!-- Image content -->
-                        <img class="img" th:attr="src='/attachment/'+ ${attachment.id} + '?attachmentId=default'">
+                        <img class="img img-fluid" th:attr="src='/preview/'+ ${attachment.id} + '?attachmentId=default&mimetype=image/jpeg&size=500'">
                     </div>
 
                     <div th:if="${attachment.isOther}">
