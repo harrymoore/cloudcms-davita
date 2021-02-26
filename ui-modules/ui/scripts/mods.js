@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
     var $ = require("jquery");
 
-    var BASE_URL_PATTERN = "http://localhost.com:8080/documents/{{document.id}}?clearCache=true";
+    var BASE_URL_PATTERN = "http://localhost.com:8080/documents/{{document.id}}";
     var rgx = /\/documents\/(?<doc>[^/]+)/;
 
     $(document).on('cloudcms-ready', function (ev) {
@@ -16,6 +16,7 @@ define(function (require, exports, module) {
                     previews.forEach(function(preview) {
                         if (preview.id === "production") {
                             BASE_URL_PATTERN = preview.url;
+                            BASE_URL_PATTERN = BASE_URL_PATTERN.replace("?clearCache=true", "");
                         }
                     });
                 }

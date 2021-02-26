@@ -65,6 +65,8 @@ Cloud CMS engagement artifacts for the Davita project
             Click "Add Publication"
         Configure a similar Publication for the "Archived" operation
     7. Define a Preview Server on "PCOMM"
+        This step is not required but it is a nice feature for editors to be able to click a button and immediately view their publishded content in the live application.
+        The content needs to be "Published" first or the application will not be able to load the link.
         While in the project "PCOMM" (this step is not necessary for the "PCOMM-LIVE" project)
         Go to "Manage Project" / "Preview Servers"
         Check "Production" and set "Preview URL" to [SERVER_URL]/documents/{{document.id}}?clearCache=true
