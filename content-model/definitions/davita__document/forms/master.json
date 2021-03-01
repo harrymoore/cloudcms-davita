@@ -11,9 +11,16 @@
 		},
 		"description": {
             "order": 2,
-			"type": "textarea",
+			"type": "ckeditor",
 			"label": "Description",
-			"default": ""
+			"default": "",
+            "ckeditor": {
+                "toolbar": [
+                    ["Format", "Font", "FontSize"],
+                    ["Bold", "Italic", "Underline"],
+                    ["Link", "Source"]
+                ]
+            }
 		},
         "startDate": {
             "order": 3,
