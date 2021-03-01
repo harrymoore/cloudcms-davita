@@ -50,29 +50,9 @@
     <!-- <p th:text="${indexDocuments}"></p> -->
 
     <div id="main" class="container-fluid">
-<!--         
-        <div class="col text-center">
-            <button type="submit" class="btn btn-primary m-1 p-0 pl-1"
-                th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">
-                <a th:href="@{/index?rangeFilter=1}"></a>Day</button>
-
-            <button type="button" th:href="@{/index?rangeFilter=7}" class="btn btn-primary filter m-1 p-0 pl-1"
-                th:classappend="${rangeFilter.equals('7') ? 'active' : ''}" aria-current="page">Week</button>
-            <button type="button" th:href="@{/index?rangeFilter=30}" class="btn btn-primary filter m-1 p-0 pl-1"
-                th:classappend="${rangeFilter.equals('30') ? 'active' : ''}" aria-current="page">Month</button>
-        </div>
-
-        <div th:if="${@environment.getProperty('app.ui-tags')}" class="col-12 text-center">
-            <button th:each="tag : ${tags}" th:href="@{/index(tagFilter=${tag.get('tag')})}"
-                th:text="${tag.get('title')}" class="btn btn-primary m-1 mt-0 mb-0 p-1"
-                th:classappend="${tagFilter}" aria-current="page">
-            </button>
-        </div>
- -->
-
         <div class="row">
             <div class="col-xl-3 col-md-4 col-sm-12 mt-1 px-1">
-                <div th:if="${@environment.getProperty('app.ui-tags')}" class="col-12 text-center">
+                <div th:if="${@environment.getProperty('app.ui-tags')}" class="col col-12 text-center">
                     <a th:each="tag : ${tags}" th:href="@{/documents(tagFilter=${tag.get('tag')})}">
                         <button 
                             type="button"
@@ -84,7 +64,23 @@
                     </a>              
                 </div>
     
-    
+                <div class="col-12 text-center">
+                    <a th:href="@{/documents?rangeFilter=1}">
+                        <button type="submit" class="btn btn-outline-primary filter m-1 mt-0 mb-0 p-1"
+                            th:classappend="${rangeFilter.equals('1') ? 'active' : ''}" aria-current="page">New Today</button>
+                    </a>
+
+                    <a th:href="@{/documents?rangeFilter=7}">
+                        <button type="submit" class="btn btn-outline-primary filter m-1 mt-0 mb-0 p-1"
+                            th:classappend="${rangeFilter.equals('7') ? 'active' : ''}" aria-current="page">New This Week</button>
+                    </a>
+
+                    <a th:href="@{/documents?rangeFilter=31}">
+                        <button type="submit" class="btn btn-outline-primary filter m-1 mt-0 mb-0 p-1"
+                            th:classappend="${rangeFilter.equals('31') ? 'active' : ''}" aria-current="page">New This Month</button>
+                    </a>
+                </div>
+
                 <div class="list-group">
                     <a th:each="doc : ${indexDocuments}" th:href="@{/documents/{documentId}(documentId=${doc.getId()})}"
                         th:text="${doc.title}" class="list-group-item list-group-item-action" aria-current="true"
@@ -109,8 +105,8 @@
                         <h2 th:text="${document.title}"></h2>
                         <!-- <h5 class="x-format-date"
                             th:text="${document.getSystemObject().get('modified_on').get('iso_8601').textValue()}"></h5> -->
-                        <h5 th:if="${document.description != ''}" th:text="${document.description}"></h5>
-                        <h5 th:each="customMetadataTag : ${document.get('metadata')}" th:text="${customMetadataTag.get('name') + ': ' + customMetadataTag.get('value')}"></h5>                        
+                        <p th:if="${document.description != ''}" th:utext="${document.description}"></p>
+                        <p th:each="customMetadataTag : ${document.get('metadata')}" th:utext="${customMetadataTag.get('name') + ': ' + customMetadataTag.get('value')}"></p>                        
                     </div>
                 </div>
 
@@ -175,12 +171,6 @@
         integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
         crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script>
-        // format dates
-        $(".x-format-date").each(function (index) {
-            $(this).text(moment($(this).text()).format('L'));
-        });
-    </script>
     <script th:if="${hasVideo || hasAudio}" src="https://vjs.zencdn.net/7.10.2/video.min.js"></script>
     <script th:if="${@environment.getProperty('pendo.enabled')}" th:inline="JavaScript">
             (function (apiKey) {
@@ -223,7 +213,7 @@
     </script>
     <script th:if="${@environment.getProperty('keycloak-js.enabled')}"
         th:attr="src=${@environment.getProperty('keycloak-js.location')}">
-        </script>
+    </script>
 
     <script th:if="${@environment.getProperty('keycloak-js.enabled')}">
         $(document).ready(function () {

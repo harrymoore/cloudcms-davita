@@ -3,7 +3,8 @@
  */
 package com.cloudcms.server;
 
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -205,10 +206,15 @@ public class CloudcmsDriver {
         query.put("_type", type);
 
         // startDate and endDate filtering
-        long now = Instant.now().getEpochSecond() * 1000L;
+        long dayNumber = ChronoUnit.DAYS.between(LocalDate.ofEpochDay(0), LocalDate.now());
+
         query.set("$and", JsonUtil.createArray()
-            .add(JsonUtil.createObject().set("$or", JsonUtil.createArray().add(JsonUtil.createObject().set("startDate", JsonUtil.createObject().put("$exists", false))).add(JsonUtil.createObject().set("startDate", JsonUtil.createObject().put("$lte", now)))))
-            .add(JsonUtil.createObject().set("$or", JsonUtil.createArray().add(JsonUtil.createObject().set("endDate", JsonUtil.createObject().put("$exists", false))).add(JsonUtil.createObject().set("endDate", JsonUtil.createObject().put("$gte", now)))))
+            .add(JsonUtil.createObject().set("$or", JsonUtil.createArray().add(JsonUtil.createObject()
+                .set("startDate", JsonUtil.createObject().put("$exists", false)))
+                .add(JsonUtil.createObject().set("startDate", JsonUtil.createObject().put("$lte", dayNumber)))))
+            .add(JsonUtil.createObject().set("$or", JsonUtil.createArray().add(JsonUtil.createObject()
+                .set("endDate", JsonUtil.createObject().put("$exists", false)))
+                .add(JsonUtil.createObject().set("endDate", JsonUtil.createObject().put("$gte", dayNumber)))))
         );
 
         if (!idList.isEmpty()) {
@@ -220,12 +226,12 @@ public class CloudcmsDriver {
         }
 
         if (rangeFilter != null) {
-            long ms = (System.currentTimeMillis() * 1000) - (Integer.parseInt(rangeFilter) * 86400000l);
+            long ms = System.currentTimeMillis() - (Integer.parseInt(rangeFilter) * 86400000l);
             query.set("_system.modified_on.ms", JsonUtil.createObject().put("$gt", ms));
         }
 
         query.set("_fields", JsonUtil.createObject().put("title", 1).put("startDate", 1).put("endDate", 1).put("_type", 1).put("_qname", 1)
-                .put("_system.modified_on.iso_8601", 1));
+            .put("_system.modified_on.iso_8601", 1).put("_system.modified_on.ms", 1));
 
         if (!tagFilter.isEmpty()) {
             query.put("tags", tagFilter);
