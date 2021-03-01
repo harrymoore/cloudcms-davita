@@ -26,6 +26,7 @@ import org.gitana.platform.client.project.Project;
 import org.gitana.platform.client.repository.Repository;
 import org.gitana.platform.client.support.DriverContext;
 import org.gitana.platform.client.support.RemoteImpl;
+import org.gitana.platform.client.support.Response;
 import org.gitana.platform.services.branch.BranchType;
 import org.gitana.platform.support.Pagination;
 import org.gitana.platform.support.QName;
@@ -159,6 +160,19 @@ public class CloudcmsDriver {
 
         // hand back the branch
         return branchList.get(branchId);
+    }
+
+    /**
+     * start a job to reindex the search indexes for a branch. don't run this too
+     * often!
+     * 
+     * @param BranchId
+     * @throws CmsDriverBranchNotFoundException
+     */
+    public void indexBranch(final String branchId) throws CmsDriverBranchNotFoundException {
+        log.info("Starting branch index job for " + getBranch(branchId).getId());
+        Response response = DriverContext.getDriver().getRemote().post(String.format("/repositories/%s/branches/%s/search/index/create/start", this.contentRepository.getId(), getBranch(branchId).getId()));
+        log.info(response.toString());
     }
 
     /**
