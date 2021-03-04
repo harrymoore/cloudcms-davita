@@ -79,7 +79,35 @@ Cloud CMS engagement artifacts for the Davita project
         Enther a name. Something like "query-support"
         Copy and paste the JSON from ./indexes/enitlement.json into JSON text block
         Click "Create"
-
+    9. Enable _statistics for a:has_tag so allow filtering out of unused tags in the ui. Only needed on the "PCOMM-LIVE" project
+        Documentation for the statistics feature can be found here: https://www.cloudcms.com/documentation/api/statistics.html
+        Click "Content Model" while in the "PCOMM-LIVE" project
+        Click "Associations"
+        Click "Show System Definitions"
+        Click "a:has_tag"
+        Click "Has Tag" in the content area to the right
+        Click the "JSON" tab
+        Add the folowing property to the "Has Tag" definition JSON:
+            "mandatoryFeatures": {
+                "f:statistics": {
+            }
+        The complete JSON definition should now look something like this:
+            {
+                "_parent": "a:linked",
+                "type": "object",
+                "title": "Has Tag",
+                "description": "A relationship identifying that a source node has a target node tag",
+                "systemBootstrapped": true,
+                "properties": {},
+                "mandatoryFeatures": {
+                    "f:statistics": {
+                    }
+                },
+                "$schema": "http://json-schema.org/draft-04/schema#"
+            }
+        Click "Save"
+        Usage statistics for tagged content will now be maintained by Cloud CMS; Allowing queries such as this:
+            
 
 ## Java App Setup:
     1. Configure java application credentials. Copy the corresponding properties from ./gitana-davita-pcomm-live.json to ./cloudcms-java-server/gitana.properties
