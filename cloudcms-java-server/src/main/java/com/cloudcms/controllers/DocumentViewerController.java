@@ -6,8 +6,10 @@ package com.cloudcms.controllers;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
@@ -71,6 +73,24 @@ public class DocumentViewerController {
 
     private final String logout_url_template = "%s/realms/%s/protocol/openid-connect/auth?response_type=code&client_id=%s&redirect_uri=__base_url__&login=true&scope=openid";
     private String logout_url;
+
+    private static final Pagination paginationAllSortByTarget = new Pagination();
+    private static final Pagination paginationAllSortByTitle = new Pagination();
+    private static final ObjectNode tagQuery = JsonUtil.createObject();
+
+    static {
+        // initialize reusable paging object
+        paginationAllSortByTitle.setLimit(-1);
+        paginationAllSortByTitle.getSorting().addSort("title", 1);
+
+        // initialize reusable paging object
+        paginationAllSortByTarget.setLimit(-1);
+        paginationAllSortByTitle.getSorting().addSort("target", 1);
+
+        // initialize reusable tag query (actually an a:has_tag association query)
+        tagQuery.put("_type", "a:has_tag");
+        tagQuery.put("source_type", CloudcmsDriver.NODE_TYPE);
+    }
 
     @PostConstruct
     private synchronized void init() {
@@ -276,16 +296,16 @@ public class DocumentViewerController {
         }
 
         if (useTags) {
-            ObjectNode query = JsonUtil.createObject();
-            query.put("_type", "n:tag");
-            query.set("_fields",
-                    JsonUtil.createObject().put("title", 1).put("tag", 1).put("_type", 1).put("_qname", 1));
+            // find a:has_tag association nodes. This will naturally filter out any unused tags
+            Set<String> tagNodeIds = new HashSet<>();
+            driver.queryAssociations(driver.getBranch(branchId).getId(), tagQuery, paginationAllSortByTitle, cache).forEach(node -> {
+                tagNodeIds.add((String)node.get("target"));
+            });
 
-            Pagination pagination = new Pagination();
-            pagination.setLimit(1000);
-            pagination.getSorting().addSort("title", 1);
-
-            map.addAttribute("tags", driver.queryNodes(driver.getBranch(branchId).getId(), query, pagination, cache));
+            ObjectNode tagNodeQuery = JsonUtil.createObject();
+            tagNodeQuery.put("_type", "n:tag");    
+            tagNodeQuery.set("_doc", JsonUtil.createObject().set("$in", JsonUtil.createArray(tagNodeIds)));
+            map.addAttribute("tags", driver.queryNodes(driver.getBranch(branchId).getId(), tagNodeQuery, paginationAllSortByTitle, cache));
         }
 
         return "index";

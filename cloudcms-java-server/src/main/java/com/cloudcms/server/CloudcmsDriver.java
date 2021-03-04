@@ -20,6 +20,7 @@ import org.gitana.platform.client.Gitana;
 import org.gitana.platform.client.application.Application;
 import org.gitana.platform.client.attachment.Attachment;
 import org.gitana.platform.client.branch.Branch;
+import org.gitana.platform.client.node.Association;
 import org.gitana.platform.client.node.Node;
 import org.gitana.platform.client.platform.Platform;
 import org.gitana.platform.client.project.Project;
@@ -278,17 +279,28 @@ public class CloudcmsDriver {
         return list;
     }
 
-    private static final String[] types = { NODE_TYPE };
-    private static final ObjectNode traverse = JsonUtil.createObject();
-    static {
-        traverse.set("associations", JsonUtil.createObject().put("a:linked", "INCOMING"));
-        traverse.put("depth", 1);
-        traverse.set("types", JsonUtil.createArray(types));
+    /**
+     * find nodes on a based on the Node "find" API call. Root the find on the branch's "root" node
+     * 
+     * @param branchId
+     * @param text
+     * @param cacheResults
+     * @return
+     * @throws CmsDriverBranchNotFoundException
+     */
+    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#query==null?'':#query.toString()).concat(#searchText == null ? '' : #text).concat(#traverse==null?'':#traverse.toString())")
+    public List<Node> findNodes(final String branchId, final ObjectNode query, final String searchText, final ObjectNode traverse, final Boolean cacheResults)
+            throws CmsDriverBranchNotFoundException {
+        log.debug("branch root node find with query: {} text: {} traverse: {}", query.toPrettyString(), searchText, traverse.toPrettyString());
+
+        List<Node> list = new ArrayList<>();
+        getBranch(branchId).rootNode().findNodes(query, searchText, traverse).forEach((k, n) -> list.add((Node) n));
+
+        return list;
     }
 
     /**
-     * find nodes on a branch. uses the node "find" API call rather than the branch
-     * "find" so the tranverse option can be used
+     * find nodes on a branch. uses the branch "find" which does a free text search using elasticsearch
      * 
      * @param branchId
      * @param text
@@ -297,7 +309,7 @@ public class CloudcmsDriver {
      * @throws CmsDriverBranchNotFoundException
      */
     @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#text == null ? '' : #text)")
-    public List<Node> findNodes(final String branchId, final String text, final Boolean cacheResults)
+    public List<Node> findNodesBranch(final String branchId, final String text, final Boolean cacheResults)
             throws CmsDriverBranchNotFoundException {
         log.debug("find nodes with string {}", text);
 
@@ -325,6 +337,28 @@ public class CloudcmsDriver {
         List<Node> list = new ArrayList<>(100);
         branch.queryNodes(query, pagination != null ? pagination : new Pagination(0, 100))
                 .forEach((k, n) -> list.add((Node) n));
+
+        return list;
+    }
+
+    /**
+     * query for associations using an arbitrary query passed in.
+     * 
+     * @param branch
+     * @param query
+     * @return List<Node>
+     * @throws CmsDriverBranchNotFoundException
+     */
+    @Cacheable(value = "query-cache", condition = "#cacheResults.equals(true)", key = "#root.methodName.concat(#branchId).concat(#query.toString())")
+    public List<Association> queryAssociations(final String branchId, final ObjectNode query, final Pagination pagination,
+            final Boolean cacheResults) throws CmsDriverBranchNotFoundException {
+        log.debug(String.format("query associations %s", query));
+
+        final Branch branch = getBranch(branchId);
+
+        List<Association> list = new ArrayList<>(100);
+        branch.queryNodes(query, pagination != null ? pagination : new Pagination(0, 100))
+                .forEach((k, n) -> list.add((Association) n));
 
         return list;
     }
