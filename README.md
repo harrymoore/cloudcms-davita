@@ -107,7 +107,14 @@ Cloud CMS engagement artifacts for the Davita project
             }
         Click "Save"
         Usage statistics for tagged content will now be maintained by Cloud CMS; Allowing queries such as this:
-            
+            {
+                "_type": "n:tag",
+                "_statistics": {
+                    "a:has_tag_INCOMING": {
+                        "$gt": 0
+                    }
+                }
+            }
 
 ## Java App Setup:
     1. Configure java application credentials. Copy the corresponding properties from ./gitana-davita-pcomm-live.json to ./cloudcms-java-server/gitana.properties
