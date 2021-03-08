@@ -13,7 +13,7 @@ define(function (require, exports, module) {
     };
 
     $(document).on('cloudcms-ready', function (ev) {
-        if ($('div#training-videos').length) {
+        if ($('div#training-video').length) {
             return;
         }
         
@@ -42,11 +42,13 @@ define(function (require, exports, module) {
             `;
 
             markup2 += `
-                <div style="display: none" id="training-videos-vid-box${n}" class="training-videos-vid-box">
-                    <div id="videCont${n}">
-                        <video style="width: 720px" id="v1" controls muted width="720" preload="none">
-                            <source src="/preview/${n}?repository=${R.o("repository").get()._doc}&branch=${R.o("branch").get()._doc}&node=${v._doc}&attachment=default&size=850&mimetype=video/mp4&name=preview_" type="video/mp4">
-                            <source src="/preview/${n+"_"}?repository=${R.o("repository").get()._doc}&branch=${R.o("branch").get()._doc}&node=${v._doc}&attachment=default&size=850&mimetype=video/mp4&name=preview_" type="video/mp4">
+                <div id="training-video-vid-box${n}" class="training-video-vid-box">
+                    <div id="video-container${n}">
+                        <video id="training-video${n}" controls muted preload="none">
+                            <source src="/proxy/repositories/${R.o("repository").get()._doc}/branches/${R.o("branch").get()._doc}/nodes/${v._doc}/attachments/default" type="video/mp4">
+                            <!--
+                            <source src="/preview/${v._doc}?repository=${R.o("repository").get()._doc}&branch=${R.o("branch").get()._doc}&node=${v._doc}&attachment=default&size=720&mimetype=video/mp4&name=trainingpreview" type="video/mp4">
+                            -->
                         </video>
                     </div>
                 </div>    
@@ -63,17 +65,19 @@ define(function (require, exports, module) {
                     ${markup1}
                 </ul>            
             </div>
-            ${markup2}
         `);
+
+        $('body').after(markup2);
 
         var n = 0;
         trainingVideos.forEach(v => {
             n += 1;
-            $(`.training-videos-vid-box${n}`).VideoPopUp({
-                backgroundColor: "#0f0f0f",
-                opener: "video-trigger${n}",
-                maxweight: "900",
-                idvideo: `training-videos-vid-box${n}`
+            $(`#training-video-vid-box${n}`).VideoPopUp({
+                backgroundColor: "#17212a",
+                opener: `video-trigger${n}`,
+                maxweight: "720",
+                idvideo: `training-video${n}`,
+                container: `video-container${n}`
             });    
         });
     });
