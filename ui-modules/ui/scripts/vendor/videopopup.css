@@ -58,13 +58,13 @@ iframe{
     height: 100%;
     opacity: 1 !important;
 }
-video{
+videopopup-video{
     position: absolute;
     top: 15%;
     left: 0;
     width: 100%;
     opacity: 1 !important;
-
+    cursor: pointer; cursor: hand;
 }
 #video1{
     cursor: pointer; cursor: hand;

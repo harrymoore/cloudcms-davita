@@ -32,26 +32,18 @@
         $(element).css("position", "absolute")
         $(element).css("top", "0");
         $(element).css("left", "0");
+        $(element).css("bottom", "0");
+        $(element).css("right", "0");
         $(element).css("height", "100%")
         $(element).css("width", "100%")
         $(element).css("display", "none");
         $(element).css("justify-content", "center")
         $(element).css("alight-items", "center")
-        // $(element).css("background", "#000");
-        $(element).css("background", "rgba(0,0,0,0.5)");
+        $(element).css("background", "rgba(0,0,0,0.7)");
         $(element).css("vertical-align", "vertical-align");
-        $(element).css("padding", "25px");
-        $(element).css("z-index", "10000");
-        // $(container).css("z-index", "400005");
-
-        // $(element).append('<div id="opct"></div>');
-        // $(element).find('#opct').css("background", settings.backgroundColor);
-        // $(element).css("z-index", "200001");
-        // $(element).css("display", "flex")
-        // $(element).css("bottom", "0");
-        // $(element).css("right", "0");
-        // $(element).css("padding", "auto");
-        // $(element).css("text-align", "center");
+        $(video).css("padding", "10px");
+        $(video).css("width", "90%");
+        $(element).css("z-index", "1000000");
         $(element).append('<div id="closer_videopopup">&otimes;</div>');
         $(opener).on('click', function () {
             $(element).show();

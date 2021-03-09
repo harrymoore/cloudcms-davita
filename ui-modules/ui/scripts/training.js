@@ -43,8 +43,8 @@ define(function (require, exports, module) {
 
             markup2 += `
                 <div id="training-video-vid-box${n}" class="training-video-vid-box">
-                    <div id="video-container${n}">
-                        <video id="training-video${n}" controls muted preload="none">
+                    <div id="video-container${n}" class="videCont">
+                        <video id="training-video${n}" class="videopopup-video" controls muted preload="none">
                             <source src="/proxy/repositories/${R.o("repository").get()._doc}/branches/${R.o("branch").get()._doc}/nodes/${v._doc}/attachments/default" type="video/mp4">
                             <!--
                             <source src="/preview/${v._doc}?repository=${R.o("repository").get()._doc}&branch=${R.o("branch").get()._doc}&node=${v._doc}&attachment=default&size=720&mimetype=video/mp4&name=trainingpreview" type="video/mp4">
@@ -77,7 +77,8 @@ define(function (require, exports, module) {
                 opener: `video-trigger${n}`,
                 maxweight: "720",
                 idvideo: `training-video${n}`,
-                container: `video-container${n}`
+                container: `video-container${n}`,
+                pausevideo: true
             });    
         });
     });
