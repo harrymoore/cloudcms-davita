@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.8.RELEASE</version>
+        <version>2.4.3</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.davita</groupId>
@@ -24,8 +24,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <keycloak.version>12.0.2</keycloak.version>
-        <spring-boot.version>2.3.8.RELEASE</spring-boot.version>
+        <spring-cloud.version>2020.0.1</spring-cloud.version>
         <java.runtime.version>11</java.runtime.version>
+        <java.version>11</java.version>
         <maven.compiler.source>${java.runtime.version}</maven.compiler.source>
         <maven.compiler.target>${java.runtime.version}</maven.compiler.target>
     </properties>
@@ -47,24 +48,11 @@
             <artifactId>gson</artifactId>
             <version>2.8.6</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-spring-boot-starter</artifactId>
             <version>${keycloak.version}</version>
         </dependency>
-        <!-- 
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-spring-security-adapter</artifactId>
-            <version>12.0.2</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-spring-boot-adapter-core</artifactId>
@@ -73,18 +61,23 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
         <dependency>
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
@@ -121,17 +114,17 @@
         </dependency>
     </dependencies>
 
-    <!-- <dependencyManagement>
+    <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.keycloak.bom</groupId>
-                <artifactId>keycloak-adapter-bom</artifactId>
-                <version>${keycloak.version}</version>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement> -->
+    </dependencyManagement>
 
     <reporting>
         <plugins>
@@ -260,37 +253,17 @@
                             </archive>
                         </configuration>
                     </execution>
-                    <!-- <execution>
-                        <id>docker-executable-jar</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <classifier>docker-jar</classifier>
-                            <exclusions>
-                                <exclude>resources/gitana.properties</exclude>
-                            </exclusions>
-                            <archive>
-                                <manifestEntries>
-                                    <Created-By>Cloud CMS</Created-By>
-                                    <Implementation-Version>${project.version}</Implementation-Version>
-                                </manifestEntries>
-                            </archive>
-                        </configuration>
-                    </execution> -->
                 </executions>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
                 <configuration>
                     <jvmArguments>
-                        <!--
                         -Xms2G -Xmx4G
-                        -->
+                        <!--
                         -Xms2G -Xmx4G -Dhttp.proxyHost=localhost.com -Dhttp.proxyPort=8888 -Dhttps.proxyHost=localhost.com -Dhttps.proxyPort=8888 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+                        -->
 					</jvmArguments>
                 </configuration>
                 <executions>
@@ -322,88 +295,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>3.1.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
-                    <!-- Remove existing image from local repo -->
-                    <!-- 
-					<execution>
-						<id>docker-clean</id>
-						<phase>install</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>docker</executable>
-							<workingDirectory>${project.basedir}</workingDirectory>
-							<arguments>
-								<argument>rmi</argument>
-								<argument>${project.groupId}/${project.artifactId}:${project.version}</argument>
-							</arguments>
-						</configuration>
-					</execution>
-					-->
-                    <!-- 
-					  Create new docker image using Dockerfile which must be present in current working directory.
-					  Tag the image using maven project version information.
-					-->
-                    <!-- <execution>
-                        <id>docker-build</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>docker</executable>
-                            <workingDirectory>${project.basedir}</workingDirectory>
-                            <arguments>
-                                <argument>build</argument>
-                                <argument>-t</argument>
-                                <argument>${project.groupId}/${project.artifactId}:${project.version}</argument>
-                                <argument>.</argument>
-                            </arguments>
-                        </configuration>
-                    </execution> -->
-
-                    <!-- Login and Push the image to a docker repo. -->
-                    <!-- <execution>
-                        <id>docker-login</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>docker</executable>
-                            <workingDirectory>${project.basedir}</workingDirectory>
-                            <arguments>
-                                <argument>login</argument>
-                                <argument>-u</argument>
-                                <argument>${docker.user}</argument>
-                                <argument>-p</argument>
-                                <argument>${docker.password}</argument>
-                                <argument>${docker.url}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>docker-push</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>docker</executable>
-                            <workingDirectory>${project.basedir}</workingDirectory>
-                            <arguments>
-                                <argument>push</argument>
-                                <argument>${project.groupId}/${project.artifactId}:${project.version}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution> -->
-                </executions>
             </plugin>
             <!-- License file helper -->
             <plugin>
