@@ -1,9 +1,7 @@
-
-${Ansi.YELLOW}     DDDD        A      V       V  IIIIIII  TTTTTTT      A
-${Ansi.YELLOW}     D   D      A A      V     V      I        T        A A
-${Ansi.YELLOW}     D    D    A   A      V   V       I        T       A   A
-${Ansi.YELLOW}     D   D    AAAAAAA      V V        I        T      AAAAAAA
-${Ansi.YELLOW}     DDDD    A       A      V      IIIIIII     T     A       A
+${Ansi.YELLOW} ___   _                  _        _                    ___                                       _               _     _                 __   __  _                            
+${Ansi.YELLOW}| _ \ | |_    _  _   ___ (_)  __  (_)  __ _   _ _      / __|  ___   _ __    _ __    _  _   _ _   (_)  __   __ _  | |_  (_)  ___   _ _     \ \ / / (_)  ___  __ __ __  ___   _ _ 
+${Ansi.YELLOW}|  _/ | ' \  | || | (_-< | | / _| | | / _` | | ' \    | (__  / _ \ | '  \  | '  \  | || | | ' \  | | / _| / _` | |  _| | | / _ \ | ' \     \ V /  | | / -_) \ V  V / / -_) | '_|
+${Ansi.YELLOW}|_|   |_||_|  \_, | /__/ |_| \__| |_| \__,_| |_||_|    \___| \___/ |_|_|_| |_|_|_|  \_,_| |_||_| |_| \__| \__,_|  \__| |_| \___/ |_||_|     \_/   |_| \___|  \_/\_/  \___| |_|  
+${Ansi.YELLOW}              |__/                                                                                                                                                              
 
 ${Ansi.WHITE} :: ${spring.application.name} ${application.version} based on Java ${java.version} and Spring Boot${spring-boot.formatted-version} :: ${Ansi.DEFAULT}
-

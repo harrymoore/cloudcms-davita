@@ -9,7 +9,6 @@ import java.util.TreeMap;
 
 import com.cloudcms.cache.CacheClearService;
 import com.cloudcms.server.CloudcmsDriver;
-import com.cloudcms.server.CmsDriverBranchNotFoundException;
 
 import org.gitana.platform.client.branch.Branch;
 import org.slf4j.Logger;
@@ -30,24 +29,6 @@ public class AdminController {
     @Autowired
     private CacheClearService cacheClearService;
 
-    // @RequestMapping("/error")
-    // public String handleError(HttpServletRequest request) {
-    // Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-
-    // if (status != null) {
-    // Integer statusCode = Integer.valueOf(status.toString());
-
-    // if(statusCode == HttpStatus.NOT_FOUND.value()) {
-    // return "error-404";
-    // }
-    // else if(statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-    // return "error-500";
-    // }
-    // }
-
-    // return "error";
-    // }
-
     @GetMapping(value = "/admin/clearcache")
     public @ResponseBody Map<String, String> clearcache() {
         log.trace("clearcache");
@@ -59,18 +40,6 @@ public class AdminController {
 
         return map;
     }
-
-    // @GetMapping(value = "/admin/indexbranch")
-    // public @ResponseBody Map<String, String> indexBranch() throws CmsDriverBranchNotFoundException {
-    //     log.trace("clearcache");
-
-    //     driver.indexBranch(null);
-
-    //     Map<String, String> map = new HashMap<>();
-    //     map.put("status", "success");
-
-    //     return map;
-    // }
 
     @GetMapping(value = { "/admin/health", "/admin/healthcheck", "/admin/hc" })
     public @ResponseBody Map<String, String> healthcheck1() {

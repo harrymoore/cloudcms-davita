@@ -13,8 +13,6 @@ import com.cloudcms.server.CmsDriverBranchNotFoundException;
 
 import org.gitana.platform.client.attachment.Attachment;
 import org.gitana.platform.client.node.Node;
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
