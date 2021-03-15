@@ -108,6 +108,7 @@ public class DocumentViewerController {
         return "redirect:" + logout_url.replace("__base_url__", request.getRequestURL().substring(0, request.getHeader("host").length() + request.getRequestURL().lastIndexOf(request.getHeader("host"))));
     }
 
+    @SuppressWarnings("unchecked")
     @GetMapping(value = { "/documents", "/documents/{nodeId}" })
     public String getDocument(final HttpServletRequest request, final HttpServletResponse response,
             @PathVariable(required = false) String nodeId, @RequestParam(required = false) final String branchId,
@@ -243,7 +244,6 @@ public class DocumentViewerController {
 
             // for each "document" relator item, gather info about the related node and it's
             // "default" attachment
-            @SuppressWarnings("unchecked")
             List<Map<String, String>> relatedDocuments = (List<Map<String, String>>) node.get("document");
             for (Map<String, String> doc : relatedDocuments) {
                 Attachment attachment = driver.getNodeAttachmentById(driver.getBranch(branchId).getId(),
