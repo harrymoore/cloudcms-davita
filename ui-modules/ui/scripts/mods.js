@@ -25,10 +25,16 @@ define(function (require, exports, module) {
             }
 
             // insert an anchor link and copy button
-            if (!$('#copy-link').length) {
-                $('#hud > div > div:nth-child(1) > div > div > div > div').append(`
-                    <button class="btn btn-default" id="copy-link" data-clipboard-action="copy" data-clipboard-target="#app-link">Copy App Link</button>
-                `);
+            if (!$('#copy-link').length && $('div.hudbar').length) {
+                if ($('#hud > div > div:nth-child(1) > div.hudbar > div > div.form-group > div.btn-group').length) {
+                    $('#hud > div > div:nth-child(1) > div.hudbar > div > div.form-group > div.btn-group').append(`
+                        <button class="btn btn-default" id="copy-link" data-clipboard-action="copy" data-clipboard-target="#app-link">Copy App Link</button>
+                    `);
+                } else {
+                    $($('div.hudbar')[0]).append(`
+                        <button class="btn btn-default" id="copy-link" data-clipboard-action="copy" data-clipboard-target="#app-link">Copy App Link</button>
+                    `);
+                }
 
                 $('#copy-link').on('click', function (event) {
                     var el = document.createElement('textarea');

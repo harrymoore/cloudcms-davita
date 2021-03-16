@@ -13,7 +13,7 @@ define(function (require, exports, module) {
     };
 
     $(document).on('cloudcms-ready', function (ev) {
-        if ($('div#training-video').length) {
+        if ($('#training-dropdown').length) {
             return;
         }
         
@@ -56,8 +56,8 @@ define(function (require, exports, module) {
         });
 
         $('.btn-header-help').parent().before(`
-            <div class="btn-group hidden-xs">
-                <button type="button" class="btn btn-link  dropdown-toggle" data-toggle="dropdown" title="Training">
+            <div id="training-dropdown" class="btn-group hidden-xs">
+                <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" title="Training">
                     <i class="fa fa-question-circle"></i>&nbsp;Davita Training&nbsp;<span class="caret"></span>
                 </button>
 
