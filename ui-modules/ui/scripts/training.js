@@ -13,6 +13,10 @@ define(function (require, exports, module) {
     };
 
     $(document).on('cloudcms-ready', function (ev) {
+        if(window.location.hash.indexOf("/projects/") < 0) {
+            return;
+        }
+        
         if ($('#training-dropdown').length) {
             return;
         }
