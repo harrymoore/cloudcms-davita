@@ -144,6 +144,16 @@ Cloud CMS engagement artifacts for the Davita project
         keycloak.securityConstraints[0].authRoles[0]=user
         keycloak.securityConstraints[0].securityCollections[0].patterns[0]=/documents/*
 
+        keycloak-logout.enabled=false
+            the keycloak-logout.enabled property determines if a "Logout" button will be available to the end user which will     termintate their Keycloak session. Note the naming difference with other keycloak properties "keycloak-logout" vs "keycloak". This is because this property does not affect the keycloak authentication functions. It is only evaluated
+            by the Thymleaf home page template cloudcms-java-server/src/main/resources/templates/index.html
+
+        eureka.client.enabled=false
+            Enable or disable Neflix Eureka discover service client
+        eureka.client.serviceUrl.defaultZone
+            This property is required by Netflix Eureka discovery service.
+            Other Eureka configuration properties may be added as necessary
+
         pendo.enabled
             true or false
             enable or disable Pendo analytics JavaScript in templated html pages
