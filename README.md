@@ -140,7 +140,7 @@ Cloud CMS engagement artifacts for the Davita project
         keycloak.use-resource-role-mappings=true
             check roles against keycloak realm's client role definitions (rather than global realm defined roles)
         keycloak.principal-attribute=preferred_username
-            use the user's name instead of id (guid-like value). used just for loggin purposes
+            use the user's name instead of id (guid-like value). used just for logging purposes
         keycloak.securityConstraints[0].authRoles[0]=user
         keycloak.securityConstraints[0].securityCollections[0].patterns[0]=/documents/*
 
@@ -166,3 +166,57 @@ Cloud CMS engagement artifacts for the Davita project
     3. Run the application. See ./cloudcms-java-server/README.md for details
         cd cloudcms-java-server
         mvn clean package -DskipTests spring-boot:run
+
+## Keycloak / Cloud CMS external (physician) role definitions.
+    Editorial users have the ability to select which roles a content item (and any of its associated documents) is available to.
+    The names of the roles are defined in Keycloak and mirrored in Cloud CMS. If the role names change in Keycloak they must be
+    correspondingly changed in Cloud CMS.
+
+### Location of the role names in Cloud CMS
+    Role names are stored in the content model type definiton JSON file:
+        ./content-model/definitions/davita__document/node.json
+    Role name display labels are stored in the type definiton's corresponding form definition JSON file:
+        ./content-model/definitions/davita__document/forms/master.json
+
+    In the section titled "entitlements" there is an "enum" property which lists the roles available for selection for a given content item.
+    These are the exact values used for matching against a keycloak authorized user's list of roles. As such, they must match the keycloak
+    role names exactly.
+    ./content-model/definitions/davita__document/node.json:
+
+        "entitlements": {
+            "type": "array",
+            "title": "Make Available to these Davita Roles",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "user",
+                    "DaVita Attending",
+                    "DaVita Attending and JV Partner",
+                    "DaVita Medical Director",
+                    "DaVita Medical Director and JV Partner"
+                ]
+            }
+        },
+
+    In the form JSON, change the "optionLabels" names as needed to match the "enum" values in the definition JSON.
+    These are the values that editorial users will see when filling out a form so the labels can be whatever makes the most sense for Davita users. For example the keycloak role named "users" may be ambiguous for editorial users so the label they will see is "Everyone".
+    ./content-model/definitions/davita__document/forms/master.json
+
+        "entitlements": {
+            "order": 5,
+            "type": "checkbox",
+            "required": false,
+            "multiple": true,
+            "removeDefaultNone": true,
+            "sort": false,
+            "optionLabels": [
+                "Everyone",
+                "DaVita Attending",
+                "DaVita Attending and JV Partner",
+                "DaVita Medical Director",
+                "DaVita Medical Director and JV Partner"
+            ]        
+		},
+
+    Change the list of role name enum and optionLabels as needed and redeploy the content model.
+    Note: any records that were created prior to updating the content model will need to be updated manually.
