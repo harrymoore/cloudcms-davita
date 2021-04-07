@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class CacheClearService {
     /**
      * Clear all caches
      */
+    @NonNull
     public void clearCache() {
         log.info("Clearing cache");
         cacheManager.getCache("node-cache").clear();
