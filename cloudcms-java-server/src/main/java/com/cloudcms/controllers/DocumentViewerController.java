@@ -122,7 +122,7 @@ public class DocumentViewerController {
 
         log.info("getDocument {}", request.getRequestURI());
 
-        if (Boolean.parseBoolean(useCache)) {
+        if (Boolean.parseBoolean(clearCache)) {
             cacheClearService.clearCache();
         }
 

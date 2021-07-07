@@ -102,6 +102,7 @@ public class CloudcmsDriver {
         // ((RemoteImpl) driver.getRemote()).setPaths(false);
         ((RemoteImpl) driver.getRemote()).setMetadata(true);
         ((RemoteImpl) driver.getRemote()).setFull(true);
+
         locale = new Locale(defaultLocale);
         DriverContext.getDriver().setLocale(locale);
 
@@ -221,7 +222,7 @@ public class CloudcmsDriver {
         query.put("_type", type);
 
         // startDate and endDate filtering
-        long dayNumber = ChronoUnit.DAYS.between(LocalDate.ofEpochDay(0), LocalDate.now());
+        long dayNumber = 1 + ChronoUnit.DAYS.between(LocalDate.ofEpochDay(0), LocalDate.now());
 
         query.set("$and", JsonUtil.createArray()
             .add(JsonUtil.createObject().set("$or", JsonUtil.createArray().add(JsonUtil.createObject()
