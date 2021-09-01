@@ -1,7 +1,10 @@
-define(function(require, exports, module) {
-    require("./fields/epoch-date-field.js");
-    require("./scripts/mods.js");
-    require("./scripts/training.js");
-    // require("./scripts/training-ratchet.js");
-    // require("./scripts/help.js");
-});
+try {
+    define(function(require, exports, module) {
+        var moduleUrl = module.uri.match(/^.+(_modules[^\/]+)\/.*/)[1];
+
+        require(`${moduleUrl}/fields/epoch-date-field.js`);
+        require(`${moduleUrl}/scripts/mods.js`);
+        require(`${moduleUrl}/scripts/training.js`);
+        require(`${moduleUrl}/scripts/help.js`);
+    });
+} finally {}
